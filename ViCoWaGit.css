@@ -1,0 +1,297 @@
+.sourcecontrol.table
+{
+    display: table;
+    table-layout: fixed; 
+}
+
+.sourcecontrol .row
+{
+    display: table-row;
+    height: 100%;
+}
+
+.sourcecontrol .cell
+{
+    display: table-cell;
+    vertical-align: top;
+    position: relative;
+}
+
+.sourcecontrol
+{
+    width: 100%;
+    height: 100%;
+    font-size: .8em;
+}
+
+.sourcecontrol .workspacetree
+{
+    position: relative;
+    width: 40em;
+}
+
+.workspacetree .jstree-default.jstree-focused
+{
+    background: transparent;
+}
+
+.workspacetree .container
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.container .jstree
+{
+    position: absolute;
+    left: .5em;
+    top: .5em;
+    bottom: .5em;
+    right: .5em;
+    overflow: auto;
+}
+
+.sourcecontrol .tabs
+{
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+}
+
+.sourcecontrol .ui-tabs-panel
+{
+    position: absolute;
+    top: 2.5em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.sourcecontrol .pendingcontent,
+.sourcecontrol .submittedcontent,
+.sourcecontrol .historycontent
+{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 1em;
+}
+
+.sourcecontrol .table-container,
+.sourcecontrol .table-container .ui-jqgrid,
+.sourcecontrol .table-container .ui-jqgrid-view
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.sourcecontrol .pendingcontent .table-container
+{
+    top: 3em;
+}
+
+.sourcecontrol .table-container .ui-jqgrid-bdiv
+{
+    position: absolute;
+    top: 4.2em;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.sourcecontrol table
+{
+    border-spacing: 0;
+}
+
+.sourcecontrol .pendingcontent .remote,
+.sourcecontrol .pendingcontent .local
+{
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    height: 1.5em;
+    width: 20px;
+    background-position: top;
+}
+
+.sourcecontrol .pendingcontent .remote.unchanged
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/unchanged.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.modified
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/modified.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.added
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/added.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.deleted
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/deleted.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.copied
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/copied.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.unmerged
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/unmerged.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.untracked
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/untracked.svg');
+}
+
+.sourcecontrol .pendingcontent .remote.ignored
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/ignored.svg');
+}
+
+.sourcecontrol .pendingcontent .local.unchanged
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/unchanged.svg');
+}
+
+.sourcecontrol .pendingcontent .local.modified
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/modified.svg');
+}
+
+.sourcecontrol .pendingcontent .local.added
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/added.svg');
+}
+
+.sourcecontrol .pendingcontent .local.deleted
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/deleted.svg');
+}
+
+.sourcecontrol .pendingcontent .local.unmerged
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/unmerged.svg');
+}
+
+.sourcecontrol .pendingcontent .local.untracked
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/untracked.svg');
+}
+
+.sourcecontrol .pendingcontent .local.ignored
+{
+    background-image: url('/raw/shared/apps/ViCoWaEditor/images/ignored.svg');
+}
+
+.sourcecontrol .commitdlg .summary,
+.sourcecontrol .commitdlg .description
+{
+    position: absolute;
+    right: 1em;
+    left: 1em;
+}
+
+.sourcecontrol .commitdlg .summary
+{
+    top: 2em;
+}
+
+.sourcecontrol .commitdlg .desctext
+{
+    margin-top: 2.5em;
+}
+
+.sourcecontrol .commitdlg .description
+{
+    top: 5.5em;
+    bottom: 10em; 
+}
+
+.sourcecontrol .tablediv
+{
+    position: relative;
+}
+
+.sourcecontrol .tablediv .ui-jqgrid,
+.sourcecontrol .tablediv .ui-jqgrid-view,
+.sourcecontrol .tablediv .ui-jqgrid-bdiv
+{
+    position: relative;
+    top: 0;
+}
+
+.sourcecontrol .command-menu,
+.sourcecontrol .command-diff-against-previous
+{
+    position: relative;
+    box-shadow: 1px 1px 3px Gray;
+    padding: 2px;
+    margin: 0 4px 0 4px;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;    
+}
+
+.sourcecontrol .command-menu:hover,
+.sourcecontrol .command-diff-against-previous:hover
+{
+    box-shadow: 1px 1px 3px Green;
+}
+
+.sourcecontrol .command-menu:active,
+.sourcecontrol .command-diff-against-previous:active
+{
+    box-shadow: 1px 1px 2px Green;
+    left: 1px;
+    top: 1px;
+    background-color: blue;
+    color: white;
+}
+
+.sourcecontrol .command-menu 
+{
+    
+}
+
+.sourcecontrol .command-diff-against-previous
+{
+    
+}
+
+.commitdlg .description
+{
+    position: absolute;
+    left: 1em;
+    top: 2em;
+    right: 1em;
+    bottom: 1em;
+}
+
+.progressdialog .progressspinnercontainer
+{
+    height: 60px;
+    bottom: 1em;
+    left: 1em;
+    right: 1em;
+    position: absolute;
+}

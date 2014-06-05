@@ -1,0 +1,9 @@
+<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 20 16">
+    <g class="button-icon">
+        <g transform="matrix(0.72727273,0,0,0.72727273,4.6665058,5)" id="small-floppy" class="button-icon">
+            <use xlink:href="#svg-floppy">
+        </g>
+        <use transform="translate(-2,-2)" xlink:href="#small-floppy" />
+        <use transform="translate(-4,-4)" xlink:href="#small-floppy" />
+    </g>
+</svg>

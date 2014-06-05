@@ -1,0 +1,5 @@
+<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16"
+    <g>
+        <path class="vcs-circle" d="M 3,8 A7,7 0 1 1 17,8 7,7 0 1 1 3,8 z"/>
+    </g>
+</svg>
