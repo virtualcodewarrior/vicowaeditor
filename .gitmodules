@@ -1,3 +1,6 @@
 [submodule "third_party/ace"]
 	path = third_party/ace
 	url = git@github.com:ajaxorg/ace.git
+[submodule "third_party/requirejs"]
+	path = third_party/requirejs
+	url = git@github.com:jrburke/requirejs.git
