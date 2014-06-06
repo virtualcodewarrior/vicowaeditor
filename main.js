@@ -5,12 +5,12 @@ require.config(
 {
     paths:
     {
-        library : ViCowaEditorBaseDomain + "/raw/shared/core/library",
-        apps : ViCowaEditorBaseDomain + "/raw/shared/apps",
-        core : ViCowaEditorBaseDomain + "/raw/shared/core",
-        jquery: ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/jquery",
-        jqueryplugin: ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/plugins",
-        ace: "ace/lib/ace"
+        "library" : ViCowaEditorBaseDomain + "/raw/shared/core/library",
+        "apps" : ViCowaEditorBaseDomain + "/raw/shared/apps",
+        "core" : ViCowaEditorBaseDomain + "/raw/shared/core",
+        "jquery": ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/jquery",
+        "jqueryplugin": ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/plugins",
+        "ace": "third_party/ace/lib/ace"
     },
     shim:
     {
@@ -51,7 +51,7 @@ require.config(
     waitSeconds: 30
 });
 
-require(["ViCoWaEditor"], function(ViCoWa)
+require(["vicowaeditor"], function(ViCoWa)
 {
     $("<link>", 
     {

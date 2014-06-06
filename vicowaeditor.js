@@ -1,7 +1,7 @@
 /* ViCoWaEditor.js - This file is part of the ViCoWa editor
  * @author Rodney Draaisma
  * @version 0.0.4
- * @copyright Copyright (C) 2011-2013 Rodney Draaisma
+ * @copyright Copyright (C) 2011-2014 Rodney Draaisma
  * @url www.vicowa.com
  * @license The MIT License - http://www.opensource.org/licenses/mit-license.php
  * -----------------------------------------------------------------------
