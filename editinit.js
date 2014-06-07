@@ -11,10 +11,10 @@
 	Path = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/") + 1);
 	
     // this code will use the items that have been set to replace the items in the hostname for development
-    window.ViCowaEditorBaseDomain = (parent && parent.ViCoWaEditor) ? DevelopHost : document.location.protocol + "//" + document.location.host;
+    window.ViCowaEditorBasePath = ((parent && parent.ViCoWaEditor) ? DevelopHost : document.location.protocol + "//" + document.location.host) + Path;
     
-    Script.src = ViCowaEditorBaseDomain + Path + "third_party/requirejs/require.js";
-    Script.setAttribute("data-main", ViCowaEditorBaseDomain + Path + "main.js");
+    Script.src = ViCowaEditorBasePath + "third_party/requirejs/require.js";
+    Script.setAttribute("data-main", ViCowaEditorBasePath + "main.js");
     
     document.getElementsByTagName("head")[0].appendChild(Script);
 })();

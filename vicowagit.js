@@ -2,7 +2,7 @@
 
 define(["jquery", 
         'jqueryplugin/jquery.jqgrid/js/jquery.jqGrid',
-        'jqueryplugin/jquery.filediff/jquery.filediff', 
+        'filediff', 
         'jqueryplugin/jquery.spin/jquery.spin', 
         'jqueryplugin/jquery.ui/js/jquery.ui', 
         "library/jquery/jquery.migrate",

@@ -5,12 +5,8 @@ require.config(
 {
     paths:
     {
-        "library" : ViCowaEditorBaseDomain + "/raw/shared/core/library",
-        "apps" : ViCowaEditorBaseDomain + "/raw/shared/apps",
-        "core" : ViCowaEditorBaseDomain + "/raw/shared/core",
-        "jquery": ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/jquery",
-        "jqueryplugin": ViCowaEditorBaseDomain + "/raw/shared/core/library/jquery/plugins",
-        "ace": "third_party/ace/lib/ace"
+        "jquery": ViCowaEditorBasePath + "third_party/jquery/dist/jquery",
+        "ace": ViCowaEditorBasePath + "third_party/ace/lib/ace/ace",
     },
     shim:
     {

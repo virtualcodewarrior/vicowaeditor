@@ -2474,7 +2474,7 @@ define([
         /// Start ViCoWaGit to handle version control
         function startViCoWaGit()
         {
-            require(["apps/ViCoWaEditor/ViCoWaGit"], function(ViCoWaGit)
+            require(["vicowagit"], function(ViCoWaGit)
             {
                 ViCoWaGit.startDialog(ViCowaEditorBaseDomain);
             });

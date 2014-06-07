@@ -7,3 +7,21 @@
 [submodule "third_party/jquery"]
 	path = third_party/jquery
 	url = git@github.com:jquery/jquery.git
+[submodule "third_party/jqGrid"]
+	path = third_party/jqGrid
+	url = git@github.com:tonytomov/jqGrid.git
+[submodule "third_party/jquery-ui"]
+	path = third_party/jquery-ui
+	url = git@github.com:jquery/jquery-ui.git
+[submodule "third_party/spin.js"]
+	path = third_party/spin.js
+	url = git@github.com:fgnass/spin.js.git
+[submodule "third_party/jsdifflib"]
+	path = third_party/jsdifflib
+	url = git@github.com:cemerick/jsdifflib.git
+[submodule "third_party/jstree"]
+	path = third_party/jstree
+	url = git@github.com:vakata/jstree.git
+[submodule "third_party/noty"]
+	path = third_party/noty
+	url = git@github.com:needim/noty.git
