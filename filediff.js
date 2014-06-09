@@ -1,5 +1,11 @@
-// show a dialog that show the difference between the first file and the second file
-define(['jquery', 'jqueryplugin/jquery.ui/js/jquery.ui', 'library/diffview/diffview', 'jqueryplugin/jquery.spin/jquery.spin'], function(dummy1, dummy2, diffview)
+// show a dialog that shows the difference between the first file and the second file
+define([
+		"jquery",
+		"diffview", 
+		"jquery.ui", 
+		"jquery.spin",
+	    "jquery.vicowa.addcss"
+		], function($, diffview)
 {
     var DiffContainer = null,
     $LockedScrollCheck = null,
@@ -12,42 +18,9 @@ define(['jquery', 'jqueryplugin/jquery.ui/js/jquery.ui', 'library/diffview/diffv
     $PrevButton = null,
     diffViewerWindow = null;
     
-    function loadStyleSheets(p_StyleSheets, p_Callback)
-    {
-        var Loaded = 0;
-        
-        $.each(p_StyleSheets, function(p_Index, p_StylesheetInfo)
-        {
-            if (!$('#' + p_StylesheetInfo.id).length)
-            {
-                $('head').append('<style id="' + p_StylesheetInfo.id + '"/>');
-            }
-            
-            $.get(p_StylesheetInfo.path, function(response)
-            {
-                $('#' + p_StylesheetInfo.id).text(response);
-                Loaded++;
-                
-                if (Loaded == p_StyleSheets.length)
-                {
-                    p_Callback();
-                }
-            });
-        });
-    }
-    
     function initializeDiffer(p_Callback)
     {
-        loadStyleSheets([
-            {
-                path: '/raw/shared/core/library/diffview/diffview.css',
-                id: 'diffview',
-            },
-            {
-                path: '/raw/shared/core/library/jquery/plugins/jquery.filediff/jquery.filediff.css',
-                id: 'filediff'
-            }
-        ], p_Callback);
+        $.addcss(['third_party/jsdifflib/1.0/diffview.css', 'filediff.css']);
     }
     
     function doShowDiff(p_FirstFileInfo, p_SecondFileInfo)

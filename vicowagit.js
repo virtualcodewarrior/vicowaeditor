@@ -1,15 +1,47 @@
-// Git interface to vicowa website 
+// vicowagit.js - This file is part of the ViCoWa editor
+// @author ViCoWa
+// @version 0.0.4
+// @copyright Copyright (C) 2011-2014 ViCoWa
+// @url www.vicowa.com
+// @license The MIT License - http://www.opensource.org/licenses/mit-license.php
+// -----------------------------------------------------------------------
+// Copyright (c) 2011-2014 ViCoWa : www.vicowa.com
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy 
+// of this software and associated documentation files (the "Software"), to deal 
+// in the Software without restriction, including without limitation the rights to 
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of 
+// the Software, and to permit persons to whom the Software is furnished to do 
+// so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all 
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+// OTHER DEALINGS IN THE SOFTWARE. 
+// -----------------------------------------------------------------------
 
 define(["jquery", 
-        'jqueryplugin/jquery.jqgrid/js/jquery.jqGrid',
-        'filediff', 
-        'jqueryplugin/jquery.spin/jquery.spin', 
-        'jqueryplugin/jquery.ui/js/jquery.ui', 
-        "library/jquery/jquery.migrate",
-        'jqueryplugin/jquery.vicowa/jquery.vicowa.servertree/jquery.vicowa.servertree'
-        ], function(dummy1, dummy2, DiffDialog)
+        "filediff", 
+        "jquery.jqGrid",
+        "jquery.spin", 
+        "jquery.ui", 
+        "jquery.vicowa.servertree",
+		"jquery.vicowa.addcss"
+//      "library/jquery/jquery.migrate",
+        ], function($, DiffDialog)
 {
-    var ViCowaGitBaseDomain = "";
+	"use strict";
+
+    $.addCSS(["third_party/jquery.jqgrid/css/ui.jqgrid.css"]);
+
+	var ViCowaGitBaseDomain = "";
 
     /// ask for a description for the commit
     /// @param p_Options : Additional options for this dialog as an object with the following elements : 

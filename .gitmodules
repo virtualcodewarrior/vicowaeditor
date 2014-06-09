@@ -1,0 +1,3 @@
+[submodule "jquery.vicowa.addcss"]
+	path = jquery.vicowa.addcss
+	url = git@github.com:virtualcodewarrior/jquery.vicowa.addcss.git

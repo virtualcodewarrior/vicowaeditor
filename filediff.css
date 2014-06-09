@@ -1,0 +1,19 @@
+.differ .diff .data .highlighted 
+{
+    border-right: 2px solid black; 
+}
+
+.differ .diff .count .highlighted 
+{
+    border-left: 2px solid black; 
+}
+
+.differ .diff .highlighted.top
+{
+    border-top: 2px solid black; 
+}
+
+.differ .diff .highlighted.bottom
+{
+    border-bottom: 2px solid black; 
+}
