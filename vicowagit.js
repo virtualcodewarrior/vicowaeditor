@@ -29,7 +29,7 @@
 
 define(["jquery", 
         "filediff", 
-        "jquery.jqGrid",
+        "jquery.jqgrid",
         "jquery.spin", 
         "jquery.ui", 
         "jquery.vicowa.servertree",
@@ -39,7 +39,7 @@ define(["jquery",
 {
 	"use strict";
 
-    $.addCSS(["third_party/jquery.jqgrid/css/ui.jqgrid.css"]);
+    $.addCSS(["third_party/jqgrid/4.6.0/css/ui.jqgrid.css"]);
 
 	var ViCowaGitBaseDomain = "";
 
@@ -240,26 +240,10 @@ define(["jquery",
     var MainDialog = function(p_ViCowaGitBaseDomain)
     {
         ViCowaGitBaseDomain = p_ViCowaGitBaseDomain || "";
-        require(["jqueryplugin/jquery.tree/jquery.tree", "jqueryplugin/jquery.cookie/jquery.cookie"], function()
+//        require(["jquery.tree", "jquery.cookie"], function()
         {
-            if (!$("link[href='" + ViCowaGitBaseDomain + "/raw/shared/apps/ViCoWaEditor/ViCoWaGit.css']").length)
-            {
-                $("<link/>", 
-                {
-                    type: "text/css",
-                    rel: "stylesheet",
-                    href: p_ViCowaGitBaseDomain + "/raw/shared/apps/ViCoWaEditor/ViCoWaGit.css"
-                }).appendTo("head");
-            }
-            if (!$("link[href='" + ViCowaGitBaseDomain + "/raw/shared/core/library/jquery/plugins/jquery.ui/css/vicowa/jquery-ui.css']").length)
-            {
-                $("<link/>", 
-                {
-                    type: "text/css",
-                    rel: "stylesheet",
-                    href: ViCowaGitBaseDomain + "/raw/shared/core/library/jquery/plugins/jquery.ui/css/vicowa/jquery-ui.css"
-                }).appendTo("head");
-            }
+			$.addCSS([ "vicowagit.css", "third_party/jquery-ui/1.10.4/themes/cupertino/jquery-ui.css"]);
+/*			$.addCSS();
             if (!$("link[href='" + ViCowaGitBaseDomain + "/raw/shared/core/library/jquery/plugins/jquery.tree/jqtree.css']").length)
             {
                 $("<link/>", 
@@ -268,11 +252,11 @@ define(["jquery",
                     rel: "stylesheet",
                     href: ViCowaGitBaseDomain + "/raw/shared/core/library/jquery/plugins/jquery.tree/jqtree.css"
                 }).appendTo("head");
-            }
+            }*/
             
             var $DialogSource = $("<div/>"),
             $DivContent = $("<div/>").addClass("sourcecontrol").addClass("table").appendTo($DialogSource),
-            $DivContentRow = $("<div/>").addClass("row").appendTo($DivContent);
+            $DivContentRow = $("<div/>").addClass("row").appendTo($DivContent),
             $WorkspaceTree = $("<div/>").addClass("workspacetree").addClass("cell").appendTo($DivContentRow),
             $DataViewTabs = $("<div/>").addClass("tabs").appendTo($("<div/>").addClass("cell").appendTo($DivContentRow)),
             $TabsList = $("<ul/>").appendTo($DataViewTabs);
@@ -284,25 +268,25 @@ define(["jquery",
             var $HistoryGrid = buildHistoryTabPage($DataViewTabs);
 
             $("<div/>").addClass("ui-widget ui-widget-content ui-corner-all").servertree(
-                {
-                    
-                },
-                {
-                    onselect : function(p_Object, p_MetaData)
-                    {
-                        $HistoryGrid.clearGridData();
-                        $('#load_history-table').show();
-                        if (p_MetaData && p_MetaData.gitpath)
-                        {
-                            // show history for the given path
-                            getFileRevisionsInfo(p_MetaData.gitpath, function(p_RevisionInfo)
-                            {
-                                $('#load_history-table').hide();
-                                $HistoryGrid.setGridParam({'data': p_RevisionInfo.result, 'userData' : { gitpath: p_MetaData.gitpath }}).trigger('reloadGrid');
-                            });
-                        }
-                    },
-                }).appendTo($("<div/>").addClass("container ui-widget ui-widget-content ui-corner-all").appendTo($WorkspaceTree));
+			{
+				
+			},
+			{
+				onselect : function(p_Object, p_MetaData)
+				{
+					$HistoryGrid.clearGridData();
+					$('#load_history-table').show();
+					if (p_MetaData && p_MetaData.gitpath)
+					{
+						// show history for the given path
+						getFileRevisionsInfo(p_MetaData.gitpath, function(p_RevisionInfo)
+						{
+							$('#load_history-table').hide();
+							$HistoryGrid.setGridParam({'data': p_RevisionInfo.result, 'userData' : { gitpath: p_MetaData.gitpath }}).trigger('reloadGrid');
+						});
+					}
+				},
+			}).appendTo($("<div/>").addClass("container ui-widget ui-widget-content ui-corner-all").appendTo($WorkspaceTree));
 
             $DataViewTabs.tabs();
             
@@ -345,7 +329,7 @@ define(["jquery",
                 ],
                 resize: function(){}
             });
-        });
+        }//);
     };
     
     function getFileRevisionsInfo(p_Path, p_Callback)
@@ -837,9 +821,9 @@ define(["jquery",
     
     function buildHistoryTabPage($DataViewTabs)
     {
-        var $HistoryTab = $("<div/>", { id: "history-tab"}).appendTo($DataViewTabs);
+        var $HistoryTab = $("<div/>", { id: "history-tab"}).appendTo($DataViewTabs),
         $HistoryContent = $("<div/>").addClass("historycontent").appendTo($HistoryTab),
-        $TableContainer = $("<div/>").addClass("table-container").appendTo($HistoryContent);
+        $TableContainer = $("<div/>").addClass("table-container").appendTo($HistoryContent),
         $HistoryTable = $("<table/>").attr("id", "history-table").appendTo($TableContainer);
 
         function fileCommandsFormatter(p_Cellvalue, p_Options, p_rowObject)

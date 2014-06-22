@@ -35,15 +35,17 @@ define([
     "vicowalogin", 
     "mimetypeimages", 
     "vicowafilesystemaccess", 
-//    "library/jquery/jquery.migrate", 
+	"dialogs/fileopendialog.js",
     "jquery.noty", 
     "jquery.vicowa.errorhandling",
     "jquery.ui", 
     "jquery.spin",
-	"jquery.vicowa.addcss"
-    ], function($, ViCoWaLogin, MimeTypeImageRetriever, ViCowaFileSystemAccess)
+	"jquery.vicowa.addcss",
+    ], function($, ViCoWaLogin, MimeTypeImageRetriever, ViCowaFileSystemAccess, FileOpenDialog)
 {
 	"use strict";
+
+	$.addCSS("vicowaeditor.css");
 
     // create a modal progress dialog for vicowa editor load, note that the styles are hardcoded since the stylesheets will not have been loaded yet
     var $ModalOverlay = $("<div/>").css({ "z-index" : "1000", position: "fixed", width: "100%", height: "100%", "left": "0", "top": "0", "background": "#eee url(images/ui-bg_diagonals-thick_90_eeeeee_40x40.png) 50% 50% repeat", opacity: ".8" }).appendTo($("body")),
@@ -69,7 +71,7 @@ define([
 		}
 		Initialize($.extend(
 		{
-			filesystemaccess: "/filesystemaccess/filesystemaccess",
+			filesystemaccess: "/filesystemaccess",
 			authentication: ""
 		}, p_Data.settings));
 	});
@@ -79,17 +81,15 @@ define([
 	function Initialize(p_Settings)
 	{
 		// create a filter to be used on disabled buttons
-		var Style = document.createElement("style");
-		Style.innerHTML = '.disabled, .disabled .button-icon{ filter:url("#grayscale"); }';
-		document.body.innerHTML += '<svg xmlns="http://www.w3.org/2000/svg" height="0">\n\
+		var Style = $("<style/>").html('.disabled, .disabled .button-icon{ filter:url("#grayscale"); }').appendTo("body");
+		$('<svg xmlns="http://www.w3.org/2000/svg" height="0">\n\
 		<defs>\n\
 		<filter id="grayscale">\n\
 		<feColorMatrix type="matrix" values="0.3333 0.3333 0.3333 0 0\n\
 							0.3333 0.3333 0.3333 0 0\n\
 							0.3333 0.3333 0.3333 0 0\n\
 							0      0      0      0.5 0"/>\n\
-		</filter></defs></svg>';
-		document.body.appendChild(Style);
+		</filter></defs></svg>').appendTo("body");
 		
 		ViCoWaLogin.setServerPath(p_Settings.authentication);
 		ViCowaFileSystemAccess.setServerPath(p_Settings.filesystemaccess);
@@ -167,16 +167,22 @@ define([
 			},1000);
 
 			// remove any #url= items from the url, not needed for editor and doesn't work properly for ajax call with cache disabled
-			var SourceURL = $.url(p_TargetPage);
-			var DeparamObject = $.deparam($.param.fragment(p_TargetPage));
-			if (DeparamObject.url)
+			if (p_TargetPage === "undefined")
 			{
-				var Port = (SourceURL.attr("port") == "80" || !SourceURL.attr("port")) ? "" : (":" + SourceURL.attr("port"));
-				p_TargetPage = SourceURL.attr("protocol") + "://" + SourceURL.attr("host") + Port + DeparamObject.url;
+				p_TargetPage = null;
+			}
+			else
+			{
+				var SourceURL = $.url(p_TargetPage);
+				var DeparamObject = $.deparam($.param.fragment(p_TargetPage));
+				if (DeparamObject.url)
+				{
+					var Port = (SourceURL.attr("port") == "80" || !SourceURL.attr("port")) ? "" : (":" + SourceURL.attr("port"));
+					p_TargetPage = SourceURL.attr("protocol") + "://" + SourceURL.attr("host") + Port + DeparamObject.url;
+				}
 			}
 
 			m_EditTargetLocation = p_TargetPage;
-			var Url = $.url(m_EditTargetLocation);
 
 			// types of files we support
 			EEditorTypes = Object.freeze(
@@ -592,24 +598,18 @@ define([
 				ViCoWaLogin.ensureLoggedIn(function()
 				{
 					// this function simply retrieves the article
-					$.ajax({
-						url: p_TargetPage,
-						dataType: "json",
-						data: $.extend({}, { type: "application/json", content: "raw" }, ViCoWaLogin.getRememberMeData()), 
-						success: function(p_Data)
+					ViCowaFileSystemAccess.load(p_TargetPage, function(p_Data)
+					{
+						if (p_AutoEncrypt)
 						{
-							if (p_AutoEncrypt)
+							p_AutoEncrypt.doDecrypt(p_Data, { bUseTimeout: false }, function(p_Data)
 							{
-								p_AutoEncrypt.doDecrypt(p_Data.content, { bUseTimeout: false }, function(p_Data)
-								{
-									p_Callback({ content : p_Data});
-								});
-							}
-						},
-						cache: false,
-						error: function ()
+								p_Callback({ content : p_Data });
+							});
+						}
+						else
 						{
-							alert("error");    
+							p_Callback({ content : p_Data });
 						}
 					});
 				}, null, null, null, -1);
@@ -750,7 +750,7 @@ define([
 				if (m_$ArticleContentPlaceHolder && m_PreviewDocument)
 				{
 					// special case when the page that is being updated is our main target page
-					if (p_Page == m_MainArticleName)
+					if (p_Page === m_MainArticleName)
 					{
 						// go through the page data and make sure our links are up-to-date
 						for (Index = 0; Index < m_Editors.length; Index++)
@@ -919,7 +919,7 @@ define([
 							}
 							else if (p_Data && p_Data.error) 
 							{
-								alert($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
+								$.ViCoWaErrorHandler.showError($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
 								// we had an error, call the callback with false
 								if (p_Callback)
 								{
@@ -928,7 +928,7 @@ define([
 							} 
 							else 
 							{
-								alert($.i18n._("Error: Unknown result from API."));
+								$.ViCoWaErrorHandler.showError($.i18n._("Error: Unknown result from API."));
 								// we had an error, call the callback with false
 								if (p_Callback)
 								{
@@ -939,7 +939,7 @@ define([
 						
 						var HandleError = function()
 						{
-							alert($.i18n._("Error: Request failed."));
+							$.ViCoWaErrorHandler.showError($.i18n._("Error: Request failed."));
 							// we had an error, call the callback with false
 							if (p_Callback)
 							{
@@ -1509,7 +1509,7 @@ define([
 					// find the correct editor and get its content
 					for (Index = 0; Index < m_Editors.length; Index++)
 					{
-						if (m_Editors[Index].getArticleName() == m_MainArticleName)
+						if (m_Editors[Index].getArticleName() === m_MainArticleName)
 						{
 							ContentData = m_Editors[Index].getEditorContent();
 							break;
@@ -1586,7 +1586,7 @@ define([
 					if (!This.m_TabinnerHTMLBackup)
 					{
 						This.m_TabinnerHTMLBackup = p_Tab.$tabicon.css("background-image");
-						p_Tab.$tabicon.css("background-image", "url('" + ViCowaEditorBaseDomain + "/raw/shared/apps/ViCoWaEditor/images/spincircle.svg')");             
+						p_Tab.$tabicon.css("background-image", "url('" + ViCowaEditorBasePath + "/images/spincircle.svg')");             
 						p_Tab.$tabicon.toggleClass("spin", 1);
 					}
 				}
@@ -1671,7 +1671,7 @@ define([
 							}
 							else if (p_Data && p_Data.error) 
 							{
-								alert($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
+								$.ViCoWaErrorHandler.showError($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
 								// we had an error, call the callback with false
 								if (p_Callback)
 								{
@@ -1680,7 +1680,7 @@ define([
 							} 
 							else 
 							{
-								alert($.i18n._("Error: Unknown result from API."));
+								$.ViCoWaErrorHandler.showError($.i18n._("Error: Unknown result from API."));
 								// we had an error, call the callback with false
 								if (p_Callback)
 								{
@@ -1691,7 +1691,7 @@ define([
 						
 						var HandleError = function()
 						{
-							alert($.i18n._("Error: Request failed."));
+							$.ViCoWaErrorHandler.showError($.i18n._("Error: Request failed."));
 							// we had an error, call the callback with false
 							if (p_Callback)
 							{
@@ -2475,7 +2475,7 @@ define([
 			{
 				require(["vicowagit"], function(ViCoWaGit)
 				{
-					ViCoWaGit.startDialog(ViCowaEditorBaseDomain);
+					ViCoWaGit.startDialog(ViCowaEditorBasePath);
 				});
 			}
 		
@@ -2605,7 +2605,10 @@ define([
 					$m_InplaceEditor = null;
 					document.getElementsByTagName("html")[0].style.overflow = "auto";
 					// the last step set the current document location back to the page that initiated the edit
-					document.location = m_EditTargetLocation;
+					if (m_EditTargetLocation)
+					{
+						document.location = m_EditTargetLocation;
+					}
 				}
 			}
 		
@@ -2793,57 +2796,20 @@ define([
 				return location.protocol + "//" + location.host + p_Path;
 			}
 		
-/*			$m_DirectorBrowseButton.serverBrowser(
+			$m_DirectorBrowseButton.on("click", function()
 			{
-				onSelect: function(path) 
+				FileOpenDialog.create({}, function(p_Result)
 				{
-					var DirOnly = (path.length) ? path[0].match(/.*\//) : null;
-					if (DirOnly)
+					if (p_Result.status === "ok" && p_Result.selected && p_Result.selected.length)
 					{
-						amplify.store("lastbrowsepath", DirOnly[0]);
+						p_Result.selected.forEach(function(p_Element)
+						{
+							openEditorTab(getFullPath(p_Element.path), getValueTypeByExtension(p_Element.path));
+						})
 					}
-					for (var Index = 0; Index < path.length; Index++)
-					{
-						openEditorTab(getFullPath(path[Index]), getValueTypeByExtension(path[Index]));
-					}
-				},
-				onLoad: function() 
-				{
-					var LastBroswePath = amplify.store("lastbrowsepath");
-					// return the path to load on start
-					return LastBroswePath || "";
-				},
-				imageUrl: ViCowaEditorBaseDomain + '/raw/shared/core/images/mime-type-icons/',
-				systemImageUrl: ViCowaEditorBaseDomain + '/raw/shared/core/images/mime-type-icons/',
-				handlerUrl: ViCowaEditorBaseDomain + '/filesystemaccess',
-				title: 'Browse',
-				basePath: "/",
-				showUpInList: true,
-				multiselect: true,
-				knownPaths: 
-				[
-					{
-						text: 'DomainRoot',
-						image: 'root.svg',
-						path:'/'
-					},
-					{
-						text: 'Shared', 
-						image:'shared.svg', 
-						path:'/shared/'
-					},
-					{
-						text: 'User data', 
-						image:'userdata.svg', 
-						path:'/userdata/'
-					}
-				],
-				width: 400,
-				height: 400,
-				knownExt: [ "bmp", "css", "gif", "html", "jpg", "js", "json", "php", "png", "svg", "txt", "xml" ],
-				imageExt: "svg"
-			});*/
-		
+				});
+			})
+
 			// save button
 			$m_SaveButton = $("<span></span>").addClass("edit-button").addClass("disabled").html(m_Icons.save).attr("title", $.i18n._("Save")).click(function()
 			{
@@ -2872,7 +2838,10 @@ define([
 			$m_SavedNotifyTooltip = $("<div></div>").addClass("saved-notify-popup").appendTo($m_InplaceEditor);
 		
 			$ProgressText.text("Loading: Preview content ...");
-			$m_TargetIFrame.attr("src", m_EditTargetLocation);
+			if (m_EditTargetLocation)
+			{
+				$m_TargetIFrame.attr("src", m_EditTargetLocation);
+			}
 		
 			function addToArray(p_Array, p_ItemToAdd)
 			{
@@ -2903,9 +2872,12 @@ define([
 				m_$ArticleContentPlaceHolder = $("#content", m_PreviewDocument);
 				if (!m_$ArticleContentPlaceHolder)
 				{
-					alert ("Preview document has no #content");
+					$.ViCoWaErrorHandler.showError("Preview document has no #content");
 				}
-				m_AvailableDocs.addDocLink(m_MainArticleName.replace(/index\//i, "").replace(/raw\//i, ""));
+				if (m_MainArticleName)
+				{
+					m_AvailableDocs.addDocLink(m_MainArticleName.replace(/index\//i, "").replace(/raw\//i, ""));
+				}
 		
 				// add style sheets
 				$("link", m_PreviewDocument).each(function()
@@ -2937,7 +2909,7 @@ define([
 				// go through the editor and check if any of them is the main article
 				for (Index = 0; Index < m_Editors.length; Index++)
 				{
-					if (m_Editors[Index].getArticleName() == m_MainArticleName.replace(/raw\//i, ""))
+					if (m_MainArticleName && m_Editors[Index].getArticleName() == m_MainArticleName.replace(/raw\//i, ""))
 					{
 						// update the content of the main article
 						m_Editors[Index].updateMainContent();
@@ -2979,11 +2951,20 @@ define([
 				$ModalOverlay.remove();
 			});
 		
-			// retrieve the raw content of the given document
-			getRawArticle(m_MainArticleName, function(p_Data)
+			if (m_MainArticleName)
 			{
-				m_PageContent = p_Data.content;
-			});
+				// retrieve the raw content of the given document
+				getRawArticle(m_MainArticleName, function(p_Data)
+				{
+					m_PageContent = p_Data.content;
+				});
+			}
+			else
+			{
+				$SpinContainer.spin(false);
+				$LoadProgress.remove();
+				$ModalOverlay.remove();
+			}
 		
 			$(window).on("resize", updateSizes);
 		

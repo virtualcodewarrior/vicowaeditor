@@ -1,0 +1,11 @@
+<svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>Layer 1</title>
+  <path stroke="#000000" d="m4.75,12.5l38.75,0l0,23.25l-38.75,0l0,-23.25z" stroke-linejoin="bevel" fill="#feffff" id="svg_1"/>
+  <line stroke="#000000" id="svg_4" y2="31.25" x2="9" y1="16.5" x1="9" stroke-linecap="null" stroke-linejoin="bevel" stroke-dasharray="null" stroke-width="null" fill="none"/>
+  <line stroke="#000000" id="svg_5" y2="16.90598" x2="9.20584" y1="15.40598" x1="7.20584" stroke-linecap="null" stroke-linejoin="bevel" stroke-dasharray="null" stroke-width="null" fill="none"/>
+  <line stroke="#000000" id="svg_6" y2="32.58934" x2="10.84687" y1="30.89886" x1="8.84687" stroke-linecap="null" stroke-linejoin="bevel" stroke-dasharray="null" stroke-width="null" fill="none"/>
+  <line id="svg_8" y2="16.75783" x2="8.98362" y1="15.35307" x1="10.7614" stroke-linecap="null" stroke-linejoin="bevel" stroke-dasharray="null" stroke-width="null" fill="none" stroke="#000000"/>
+  <line stroke="#000000" id="svg_9" y2="32.53561" x2="7.13177" y1="31.03561" x1="8.98362" stroke-linecap="null" stroke-linejoin="bevel" stroke-dasharray="null" stroke-width="null" fill="none"/>
+ </g>
+</svg>

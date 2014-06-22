@@ -1,0 +1,75 @@
+.fileopen,
+.fileopen .tree-container
+{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hide;
+}
+
+.fileopen .serverdirectorycontent
+{
+	position: absolute;
+	left: 1em;
+	top: 3em;
+	right: 1em;
+	bottom: 3em;
+}
+
+.fileopen
+{
+	padding: 1em;
+}
+
+.fileopen .buttonrow
+{
+	position: absolute;
+	bottom: 0;
+	padding: .5em 0;
+	right: 1em;
+}
+
+.fileopen .tree-container
+{
+	overflow: auto;
+	box-shadow: -.5em 0 5em -1em gray inset;
+}
+
+.fileopen .root
+{
+	background-image: url("/images/root.svg");
+	background-size: 24px 24px;
+}
+
+.fileopen .shared
+{
+	background-image: url("/images/shared.svg");
+	background-size: 24px 24px;
+}
+
+.fileopen .userdata
+{
+	background-image: url("/images/userdata.svg");
+	background-size: 24px 24px;
+}
+
+.fileopen .folder
+{
+	background-image: url("/images/folder.svg");
+	background-size: 24px 24px;
+}
+
+.fileopen label,
+.fileopen .row
+{
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.fileopen .row input,
+.fileopen .row label
+{
+	display: inline-block;
+}

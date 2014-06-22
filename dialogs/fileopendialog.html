@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>fileopendialog</title>
+		<script src="/third_party/requirejs/2.1.14/requirejs.js" data-main="dialogmain.js" dialog="fileopendialog"></script>
+	</head>
+	<body>
+		<div class="fileopendialog">
+			<div>
+				<div class="fileopen">
+					<link href="/dialogs/fileopendialog.css" type="text/css" rel="stylesheet"></link>
+					<div class="row">
+					<input class="all" type="button" value="expand all"></input><label><input class="filterwebpage" type="checkbox" title="Only show the items that are referenced by the current active web page">Filter by current web page</input></label>
+					</div>
+					<div class="serverdirectorycontent">
+						<div class="tree-container">
+							<div class="servertree">
+							</div>
+						</div>
+					</div>
+					<div class="buttonrow row">
+						<input class="open" type="button" value="open" disabled></input>
+						<input class="cancel" type="button" value="cancel"></input>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -16,25 +16,6 @@
 		getFileDirect($RealPath, $RealRequestedPath, $p_MimeType, $p_Content);
 	};
 
-	/// Get a file from the shared location, the given path is assumed to be relative from the branch and should start with /shared (e.g. develop/shared/core/)
-	function getSharedFile($p_FilePath, $p_RequestedPath, $p_MimeType, $p_Content)
-	{
-		// prepend the correct path here
-		$RealPath = getFullPath($p_FilePath);
-		$RealRequestedPath = ($p_RequestedPath != null) ? getFullPath($p_RequestedPath) : null;
-		
-		getFileDirect($RealPath, $RealRequestedPath, $p_MimeType, $p_Content);
-	};
-	
-	function getUserDataFile($p_FilePath, $p_RequestedPath, $p_MimeType, $p_Content)
-	{
-		// prepend the correct path here
-		$RealPath = getFullPath($p_FilePath);
-		$RealRequestedPath = ($p_RequestedPath != null) ? getFullPath($p_RequestedPath) : null;
-
-		getFileDirect($RealPath, $RealRequestedPath, $p_MimeType, $p_Content);
-	}
-	
 	/// Retrieve the extension from the given path
 	/// @param $p_FilePath : The path from which we are retrieving the extension
 	/// @return the extension for the given path

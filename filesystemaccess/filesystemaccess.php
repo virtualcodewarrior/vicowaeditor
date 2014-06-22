@@ -4,9 +4,25 @@
     {
         exit;
     }
-
-    require_once('writefile.php');
-    require_once('getfile.php');
+    
+	require_once('writefile.php');
+	
+	unset($DP);
+	
+	// set the edit root, you cannot access files below this location
+	function setDomainPath($p_Origin)
+	{
+		global $DP;
+		$DP = $p_Origin; 
+	}
+	
+	function getDomainPath($File)
+	{
+		global $DP;
+		return str_replace("//", "/", "$DP/$File");
+	}
+	
+	setDomainPath("/home/rodney/Development/vicowaeditortestroot/");
 
     $IsPostAction = false;
     $IsActionProcessed = false;
@@ -34,7 +50,7 @@
     }
     else if (isset($_GET['action']))
     {
-        // get actions can only be used for actions that don't change anything
+		// get actions can only be used for actions that don't change anything
         $action = trim(strtolower($_GET['action']));
         $data = (isset($_GET['text'])) ? $_GET['text'] : null;
         $RealPassedPath = (isset($_GET['path'])) ? $_GET['path'] : null; 
@@ -46,18 +62,10 @@
     function processPassedPath($passedpath, $action)
     {
         global $UserInfo;
-        global $IP;
         global $DP;
         
         if ($passedpath !== null)
         {
-            // have to use $_SERVER["HTTP_ORIGIN"] to see which domain this request originated from originally
-            $Origin = $_SERVER["HTTP_ORIGIN"];
-            if ($Origin && preg_match("/http:\/\//", $Origin))
-            {
-                $Origin = substr($Origin, strlen("http://"));
-            }
-
             // strip the protocol and server name from the path
             if (preg_match("/http:\/\//", $passedpath))
             {
@@ -67,65 +75,23 @@
             {
                 $passedpath = substr($passedpath, strlen($_SERVER["HTTP_HOST"]));
             }
-            if (preg_match("/^" . $Origin . "/", $passedpath))
-            {
-                $passedpath = substr($passedpath, strlen($Origin));
-            }
             if (substr($passedpath, 0, 1) == "/")
             {
                 $passedpath = substr($passedpath, 1);
             }
-            if (preg_match('/^raw\//i', $passedpath)) // remove raw from the start of the path if it exists
-            {
-                $passedpath = substr($passedpath, strpos($passedpath, "/") + 1);
-            }
             
-            // remove any relative paths using ..
+            // remove any relative paths using .., this to prevent going below the root
             while (preg_match('/\w+\/\.\.\//', $passedpath))
             {
                 $passedpath = preg_replace('/\w+\/\.\.\//', '', $passedpath);
             }
 
-            $OriginalIP = $IP;
-            // user data will come from its own origin and will not be forced to develop branch
-            if (!preg_match("/^userdata\//i", $passedpath))
-            {
-                $IP = realpath(DEVELOP);
-            }
-            $OriginalDP = $DP;
-            if ($Origin)
-            {
-                setDomainPath($Origin);
-            }
-
-            // paths will always have their root at the domain, shared or user data
-            if (preg_match("/^shared\//i", $passedpath) || preg_match("/^shared$/i", $passedpath)) 
-            {
-                $passedpath = getFullPath($passedpath);
-            }
-            else if (preg_match("/^userdata\//i", $passedpath))
-            {
-                if (isset($UserInfo["name"]) && strlen(trim($UserInfo["name"])) > 0)
-                {
-                    $passedpath = getFullPath(preg_replace('/^userdata\//i', 'userdata/' . trim($UserInfo["name"]) . '/', $passedpath));
-                }
-                else
-                {
-                    $passedpath = getDomainPath("/");
-                }
-            }
-            else
-            {
-                $passedpath = getDomainPath($passedpath);
-            }
+            $passedpath = getDomainPath($passedpath);
 
             if ($action != "create" && $action != "mkdir" && $action != "upload")
             {
                 $passedpath = realpath($passedpath);
             }
-
-            $IP = $OriginalIP;
-            $DP = $OriginalDP;
         }
     
         return $passedpath;
@@ -514,13 +480,12 @@
                     {
                         case "json":
                         {
-                            $readResult = filterContent($readResult, null);
                             $readResult = json_decode($readResult);
                         }
                         break;
                         default: 
                         {
-                            $readResult = filterContent($readResult, null);
+                            $readResult = $readResult;
                         }
                         break;
                     }
@@ -575,10 +540,6 @@
                             if (strrpos($passedPaths[$RealPassedPath], getDomainPath("")) === 0)
                             {
                                 $GitPath = substr($GitPath, strlen(getDomainPath("")));
-                            }
-                            else
-                            {
-                                $GitPath = substr($GitPath, strlen(getFullPath("")));
                             }
                             
                             $element["gitpath"] = $GitPath; 

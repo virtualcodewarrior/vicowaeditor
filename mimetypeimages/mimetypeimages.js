@@ -27,9 +27,17 @@
 // OTHER DEALINGS IN THE SOFTWARE. 
 // -----------------------------------------------------------------------
 
-define([
-		"vicowafilesystemaccess" 
-	   ], function(ViCowaFileSystemAccess)
+(function(p_Factory)
+{
+    if (typeof define === 'function' && define.amd)
+    {
+		define([ "jquery", "vicowafilesystemaccess" ], p_Factory);
+	}
+	else
+	{
+		window.mimetypeimages = p_Factory(jQuery, window.vicowafilesystemaccess)
+	}
+}(function($, ViCowaFileSystemAccess)
 {
 	"use strict";
 
@@ -45,24 +53,27 @@ define([
 			ViCowaFileSystemAccess.browse(imagePath, function(files)
 			{
 				ImagePaths = {};
-				files.forEach(function(p_File)
+				if (files)
 				{
-					if (!p_File.isError && !p_File.isFolder)
+					$.each(files, function(p_Name, p_File)
 					{
-						var Ext = "",
-						mimetype = "";
-						
-						var Matches = p_File.name.match(/^(.*)\.(.*)$/);
-						if (Matches && Matches.length > 2)
+						if (!p_File.isError && !p_File.isFolder)
 						{
-							Ext = Matches[2];
-							MimeType = Matches[1];
+							var Ext = "",
+							mimetype = "";
 							
-							ImagePaths[MimeType.toLowerCase()] = {};
-							ImagePaths[MimeType.toLowerCase()][Ext.toLowerCase()] = p_File.name;
+							var Matches = p_File.name.match(/^(.*)\.(.*)$/);
+							if (Matches && Matches.length > 2)
+							{
+								Ext = Matches[2];
+								MimeType = Matches[1];
+								
+								ImagePaths[MimeType.toLowerCase()] = {};
+								ImagePaths[MimeType.toLowerCase()][Ext.toLowerCase()] = p_File.name;
+							}
 						}
-					}
-				});
+					});
+				}
 				if (p_Callback)
 				{
 					p_Callback();
@@ -123,4 +134,4 @@ define([
         setImagesPath : function(p_ImagesPath){ imagePath = p_ImagesPath; ImagePaths = null; },
         setFileSystemAccess : function(p_FileSystemAccess){ fileSystemAccess = p_FileSystemAccess; ImagePaths = null; }
     };
-});
+}));

@@ -70,7 +70,7 @@
 				if (GetExtension($p_FilePath) == "js" && !preg_match('/\.min\.js$/i', $p_FilePath) && $p_AllowMinify)
 				{
                     $BytesWritten = 0;
-					require_once(getFullPath('/shared/core/contenthandling/jsminplus.php'));
+					require_once('jsminplus.php');
 				
 					// create the name for the minified version
 					$JsMinPath = substr($p_FilePath, 0, -2) . "min.js";

@@ -27,7 +27,17 @@
 // OTHER DEALINGS IN THE SOFTWARE. 
 // -----------------------------------------------------------------------
 
-define(["jquery"], function($)
+(function(p_Factory)
+{
+	if (typeof define === 'function' && define.amd)
+	{
+		define(["jquery"], p_Factory);
+	}
+	else
+	{
+		window.vicowafilesystemaccess = p_Factory(jQuery);
+	}
+}(function($)
 {
 	"use strict";
 
@@ -108,7 +118,11 @@ define(["jquery"], function($)
     
     return {
         serverPath : "",
-        setServerPath : function(p_ServerPath){ this.serverPath = p_ServerPath; },
+        setServerPath : function(p_ServerPath)
+		{ 
+			this.serverPath = p_ServerPath; 
+			
+		},
         setRememberMeDataRetriever : function(p_Callback){ retrieveRememberMeData = (typeof p_Callback === "function") ? p_Callback : retrieveRememberMeData; },
         save : function(p_Path, p_Data, p_Callback)
         {
@@ -255,4 +269,4 @@ define(["jquery"], function($)
             });         
         }
     };
-});
+}));
