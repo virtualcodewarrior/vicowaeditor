@@ -22,7 +22,7 @@
 		return str_replace("//", "/", "$DP/$File");
 	}
 	
-	setDomainPath("/home/rodney/Development/vicowaeditortestroot/");
+	setDomainPath("/home/rodney/Development/vicowaeditor/");
 
     $IsPostAction = false;
     $IsActionProcessed = false;
@@ -123,6 +123,8 @@
                 $Result = "Success";
                 $Append = (isset($_POST['append']) && $_POST['append'] == 'true') ? true : false;
                 $FileWriteID = (isset($_POST['writeid'])) ? $_POST['writeid'] : "";
+                
+                $passedpath = reset($passedPaths);
 
                 // create a hash for the file path
                 $iptocheck= $_SERVER['REMOTE_ADDR'];

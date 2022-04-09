@@ -1,0 +1,30 @@
+.vicowa-editor .previewload div
+{
+	background-image: url("/images/reloadframe.svg");
+}
+
+.vicowa-editor .savereload div
+{
+	background-image: url("/images/savereload.svg");
+}
+
+.vicowa-editor .reload div
+{
+	background-image: url("/images/redo_javascript.svg");
+}
+
+.vicowa-editor .eval div
+{
+	background-image: url("/images/eval.svg");
+}
+
+.vicowa-editor .evalselection div
+{
+	background-image: url("/images/eval_selection.svg");
+}
+
+.vicowa-editor .insertloadreset div
+{
+	background-image: url("/images/insert_resetload.svg");
+}
+

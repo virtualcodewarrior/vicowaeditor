@@ -44,7 +44,7 @@
 	var ImagePaths = null,
     fileSystemAccess = "",
     imageExtension = "svg",
-    imagePath = "images/";
+    imagePath = ((pathmapping) ? pathmapping.getPath("mimetypeimages") : "") + "images/";
     
     function RetrieveImageFileInformation(p_Callback)
     {

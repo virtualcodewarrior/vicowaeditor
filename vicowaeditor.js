@@ -28,7 +28,7 @@
 // -----------------------------------------------------------------------
 
 /*jslint es5: true, regexp: true, devel: true, browser: true, evil: true, plusplus: true*/
-/*global $,ace,require,ViCoWaEditorMessages, amplify, unescape, ViCowaEditorBaseDomain, embedded_svg_edit*/
+/*global $,ace,require,ViCoWaEditorMessages, amplify, unescape, ViCowaEditorBasePath, embedded_svg_edit, noty*/
 
 define([
     "jquery", 
@@ -43,6 +43,23 @@ define([
 	"jquery.vicowa.addcss",
     ], function($, ViCoWaLogin, MimeTypeImageRetriever, ViCowaFileSystemAccess, FileOpenDialog)
 {
+	function MakeHash(p_String) 
+	{
+		var hash = 0, 
+		Index, 
+		chr;
+		if (p_String.length !== 0) 
+		{
+			for (Index = 0; Index < p_String.length; Index++) 
+			{
+				chr   = p_String.charCodeAt(Index);
+				hash  = ((hash << 5) - hash) + chr;
+				hash |= 0; // Convert to 32bit integer
+			}
+		}
+		return hash;
+	}
+
 	"use strict";
 
 	$.addCSS("vicowaeditor.css");
@@ -52,7 +69,8 @@ define([
     $LoadProgress = $("<div/>").css({ "z-index" : "1001", position: "absolute", width: "20em", height: "10em", left: "50%", top: "50%", margin: "-5em 0 0 -10em", padding: "1em", "border-radius" : "1em", "background-color" : "white", border: "1px solid black", "box-shadow": "2px 2px 4px Gray"  }).appendTo($("body")),
     $TextContainer = $("<div/>").text("Initializing ViCoWa editor").css({"font-weight": "bold", "text-align" : "center", width: "100%"}).appendTo($LoadProgress),
     $ProgressText = $("<span/>").appendTo($("<div/>").appendTo($LoadProgress)),
-    $SpinContainer = $("<div/>").css({ position: "absolute", left: "1em", right: "1em", bottom: "1em", height: "4em"}).appendTo($LoadProgress).spin();
+    $SpinContainer = $("<div/>").css({ position: "absolute", left: "1em", right: "1em", bottom: "1em", height: "4em"}).appendTo($LoadProgress).spin(),
+	m_EditorFactories = [];
 
 	// attach the error handler
     $.error = $.ViCoWaErrorHandler.showError;
@@ -123,7 +141,6 @@ define([
 			m_MainArticleName, 
 			$m_TargetIFrame, 
 			$m_TabList,
-			$m_ButtonBar,
 			$m_SaveButton, 
 			$m_SaveAllButton, 
 			$m_SavedNotifyTooltip, 
@@ -131,17 +148,11 @@ define([
 			$m_InplaceEditor,
 			$m_InplaceTargetSection, 
 			$m_InplaceEditorSection,
-			$m_Gripper, 
-			$m_EditorContainer, 
 			$m_OpenButton, 
-			$m_DirectorBrowseButton,
-			$m_VersionControlButton,
-			$m_CloseButton, 
 			updateSizes, 
 			m_EditToken, 
 			m_Events, 
 			Index, 
-			m_Icons, 
 			m_PreviewDocument, 
 			m_MainArticleTemplates,
 			m_PageContent, 
@@ -171,7 +182,7 @@ define([
 			{
 				p_TargetPage = null;
 			}
-			else
+			if (p_TargetPage)
 			{
 				var SourceURL = $.url(p_TargetPage);
 				var DeparamObject = $.deparam($.param.fragment(p_TargetPage));
@@ -421,126 +432,12 @@ define([
 				return Result;
 			}
 		
-			// object containing our icons as svg sections
-			m_Icons = 
-			{
-				'reload_frame' : 
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<g class="button-icon">\n\
-				<path d="M 14,9 A 5,5 0 1 1 12,3" style="fill:none;stroke:#00007f;stroke-width:2;" />\n\
-				<path d="M 14,7 L 10,5.5 L 13,2.5 L 14,7 z" style="fill:#00007f;stroke:#00007f;stroke-width:1.1;" />\n\
-				<rect width="18" height="14.5" x="0.5" y="0.5" style="fill:none;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:4;" />\n\
-			</g>\n\
-		</svg>',
-				'redo_javascript' : 
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<g class="button-icon">\n\
-				<g id="RefreshArrow">\n\
-					<path d="M 16,8 A 7,6.5 0 1 1 14,3" style="fill:none;stroke:#00007f;stroke-width:2;" />\n\
-					<path d="M 15,6 L 11,4.5 L 14,1.5 L 15,6 z" style="fill:#00007f;stroke:#00007f;stroke-width:1.1;" />\n\
-				</g>\n\
-				<text style="font-size:8px;font-family:Bitstream Vera Sans"><tspan x="4.5" y="11">JS</tspan></text>\n\
-			</g>\n\
-		</svg>',
-				'eval' :
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<g class="button-icon">\n\
-				<text style="font-size:10px;font-family:Arial;"><tspan x="0" y="8">(\'x;\')</tspan></text>\n\
-			</g>\n\
-		</svg>',            
-				'eval_selection' : 
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<g class="button-icon">\n\
-				<rect width="8" height="10" x="5" y="1" style="fill:#0000ff;stroke:none;" />\n\
-				<text style="font-size:10px;font-family:Arial;"><tspan x="0" y="8">(\'<tspan style="fill:#ffffff;">x;</tspan>\')</tspan></text>\n\
-			</g>\n\
-		</svg>',
-				'insert_resetload': 
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-		<g class="button-icon">\n\
-				<text style="font-size:9px;font-family:Arial;"><tspan x="0" y="6">reset</tspan></text>\n\
-				<text style="font-size:9px;font-family:Arial;"><tspan x="0" y="16">load</tspan></text>\n\
-		</g></svg>',
-				'save_reload' :
-		'<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<g><use transform="matrix(0.8,0,0,0.8,1,1)" xlink:href="#svg-floppy"></g>\n\
-			<g><use transform="matrix(1,0,0,1.0,0,0)" xlink:href="#RefreshArrow"></g>\n\
-		</svg>',
-				'versioncontrol' : 
-		'<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">\n\
-			<g>\n\
-				<path class="vcs-circle" d="M 3,8 A7,7 0 1 1 17,8 7,7 0 1 1 3,8 z"/>\n\
-			</g>\n\
-		</svg>',
-				'close' : 
-		'<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">\n\
-			<g>\n\
-				<path class="close-circle" d="M 3,8 A7,7 0 1 1 17,8 7,7 0 1 1 3,8 z"/>\n\
-				<path class="close-x-line" d="M 6,12 14,4" />\n\
-				<path class="close-x-line" d="m 6,4 8,8" />\n\
-			</g>\n\
-		</svg>',
-				'open' : 
-		'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">\n\
-			<defs>\n\
-				<linearGradient id="linearGradient3175">\n\
-					<stop style="stop-color:#ffc000;stop-opacity:1" offset="0" />\n\
-					<stop style="stop-color:#000000;stop-opacity:1" offset="1" />\n\
-				</linearGradient>\n\
-				<linearGradient x1="10.669642" y1="7.2276778" x2="10.669642" y2="14.482142" id="linearGradient3181" xlink:href="#linearGradient3175" gradientUnits="userSpaceOnUse" />\n\
-			</defs>\n\
-			<g class="button-icon">\n\
-				<path d="M 3.0803572,14.482142 L 3.0803572,1.4910705 L 8.2589286,1.4910705 L 8.2589286,3.0089285 L 17.857143,3.0089285 L 17.857143,14.482142 L 3.0803572,14.482142 z" style="fill:url(#linearGradient3181);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />\n\
-				<path d="M 3.0803572,14.482142 L 5.0892858,10.017857 L 19.866072,10.017857 L 17.857143,14.482142" style="fill:#ffc000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />\n\
-			</g>\n\
-		</svg>',   
-				'save' : 
-		'<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">\n\
-			<defs>\n\
-				<linearGradient id="linearGradient3617">\n\
-					<stop style="stop-color:#7d7f7f;stop-opacity:1" offset="0" />\n\
-					<stop style="stop-color:#ffffff;stop-opacity:1" offset="0.5" />\n\
-					<stop style="stop-color:#7d7f80;stop-opacity:1" offset="1" />\n\
-				</linearGradient>\n\
-				<linearGradient x1="10" y1="11" x2="13" y2="15" id="linearGradient3627" xlink:href="#linearGradient3617" gradientUnits="userSpaceOnUse" />\n\
-			</defs>\n\
-			<g class="button-icon">\n\
-				<g id="svg-floppy">\n\
-					<path d="M 3,1 17,1 17,15 5,15 3,13 3,1 z" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1" />\n\
-					<rect width="8" height="4" x="6" y="11" style="fill:url(#linearGradient3627);fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<rect width="2" height="2.9999826" x="7" y="11" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.61237067;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<rect width="10" height="6" x="5" y="3" style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />\n\
-					<rect width="10" height="2" x="5" y="1" style="fill:#c80000;fill-opacity:1;fill-rule:evenodd;stroke:none" />\n\
-					<path d="M 6,4 14,4" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<path d="M 6,5 14,5" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<path d="M 6,6 14,6" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<path d="M 6,7 14,7" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-					<path d="M 6,8 14,8" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n\
-				</g>\n\
-			</g>\n\
-		</svg>',
-				'saveall' :
-		'<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">\n\
-			<g class="button-icon">\n\
-			<g transform="matrix(0.72727273,0,0,0.72727273,4.6665058,5)" id="small-floppy" class="button-icon">\n\
-				<use xlink:href="#svg-floppy">\n\
-			</g>\n\
-				<use transform="translate(-2,-2)" xlink:href="#small-floppy" />\n\
-				<use transform="translate(-4,-4)" xlink:href="#small-floppy" />\n\
-			</g>\n\
-		</svg>',
-				'spincircle' :
-		'<svg class="svg-container spin-circle-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g>\n\
-			<path class="spin-circle" d="M 15,8 A 7,7 0 0 1 1,8" />\n\
-		</g></svg>'
-		};
-		
 			m_Editors = []; // array of editors that are currently active
 			m_EditorsToUpdate = []; // editors to be updated, this is sorted so the first item is the main text (if available and the next ones are text editors and then the rest)
-			m_MainArticleName = p_TargetPage; // the main article is initialized with the target page, this should never have /index/ preceding it
+			m_MainArticleName = p_TargetPage; // the main article is initialized with the target page
 			m_EditToken = 0;    
-			m_Events = {};      // will hold the events      
-			m_PreviewDocument = null;  // this is our preview document within the  iframe     
+			m_Events = {};              // will hold the events      
+			m_PreviewDocument = null;   // this is our preview document within the  iframe     
 			m_MainArticleTemplates = null;
 			m_PageContent = null;
 			m_$ArticleContentPlaceHolder = null;
@@ -568,7 +465,7 @@ define([
 				}
 			};
 		
-			/// Executes the given event, this will call all regestired event listeners for the given event
+			/// Executes the given event, this will call all registered event listeners for the given event
 			/// @param p_EventName : The name of the event we are executing
 			function executeEvent(p_EventName)
 			{
@@ -644,24 +541,24 @@ define([
 		
 				// go through the tabs and mark the one visible for the active tab
 				// also mark the appropriate content visible
-				for (Index = 0; Index < $m_TabList[0].childNodes.length; Index++)
+				$m_TabList.children().each(function()
 				{
-					Tab = $m_TabList[0].childNodes[Index];
-					if (m_Editors.length > 0 && Tab.m_Editor === m_Editors[0])
+					var $Tab = $(this);
+					if (m_Editors.length > 0 && $Tab[0].m_Editor === m_Editors[0])
 					{
-						Tab.className += " active";
-						Tab.m_TabContent.className += " visible";
-						Tab.m_Active = true;
-						Tab.m_Editor.update();
+						$Tab[0].m_Active = true;
+						$Tab.toggleClass("active", true);
+						$Tab[0].$m_TabContent.toggleClass("visible", true);
+						$Tab[0].m_Editor.update();
 					}
 					else
 					{
-						Tab.m_Active = false;
-						Tab.className = Tab.className.replace(/\s+active\b/gi, "");
-						Tab.m_TabContent.className = Tab.m_TabContent.className.replace(/\s+visible\b/gi, "");
+						$Tab[0].m_Active = false;
+						$Tab.toggleClass("active", false);
+						$Tab[0].$m_TabContent.toggleClass("visible", false);
 					}
-				}
-		
+				});
+				
 				updateSizes();
 		
 				// if we have an active editor, enable the save buttons
@@ -684,8 +581,8 @@ define([
 					}
 				}
 				// if no editors are left, disable the save buttons
-				$m_SaveButton.toggleClass("disabled", !(m_Editors.length > 0));
-				$m_SaveAllButton.toggleClass("disabled", !(m_Editors.length > 0));
+				$m_SaveButton.toggleClass("disabled", m_Editors.length <= 0);
+				$m_SaveAllButton.toggleClass("disabled", m_Editors.length <= 0);
 			}
 		
 			/// set the active editor
@@ -793,1192 +690,17 @@ define([
 				}
 			}
 			
-			/// Construct an SVG editor object
-			/// @param p_TargetPath : The name of the SVG file we are editing
-			/// @param p_Tab : The tab associated with the editor, passed in here so it can receive an editor reference
-			function CSVGEditor(p_TargetPath, p_Tab)
-			{
-				var m_Modified = null,                              ///< Keeps track if the editor has modified the file
-				m_bSaving = false,                                  ///< Indicates if a save operation is in progress
-				m_bLoading = false,                                 ///< Indicates if a load operation is in progress
-				m_PageName = /[^=]+$/.exec(p_TargetPath)[0],        ///< The target path to the page stripped from excess data
-				m_Editor = null,
-				This = this,                                        ///< copy the this pointer in this local object for use in locally scoped functions
-				$ReloadIFrameBtn = null;                            ///< the button for reloading the preview frame 
-				this.m_TabinnerHTMLBackup = null;                   ///< backs up the inner html of the tab when using the load or save spinner
-				
-				/// Set the modified date/time for the active editor
-				/// @param p_Modified : The new modified time, a time for modified null for NOT modified
-				function setModified(p_Modified)
-				{
-					m_Modified = p_Modified;
-					if (m_Modified !== null)
-					{
-						if (!/\s+modified\b/gi.test(p_Tab.tab.className))
-						{
-							p_Tab.tab.className += " modified";
-						}
-					}
-					else
-					{
-						p_Tab.tab.className = p_Tab.tab.className.replace(/\s+modified\b/gi, "");
-					}
-				}
-		
-				/// Start the spinning circle animation in the editor tab to indicate save or load on an editor
-				function startSpinner()
-				{
-					// check if one is already running
-					if (!This.m_TabinnerHTMLBackup)
-					{
-						This.m_TabinnerHTMLBackup = p_Tab.$tabicon.css("background-image");
-						p_Tab.$tabicon.css("background-image", "url('" + ViCowaEditorBaseDomain + "/raw/shared/apps/ViCoWaEditor/images/spincircle.svg')");             
-						p_Tab.$tabicon.toggleClass("spin", 1);
-					}
-				}
-		
-				/// Stop the spinning circle animation in the editor tab
-				function stopSpinner()
-				{
-					// check if one is running
-					if (This.m_TabinnerHTMLBackup)
-					{
-						p_Tab.$tabicon.css("background-image", This.m_TabinnerHTMLBackup);
-						This.m_TabinnerHTMLBackup = null;
-						p_Tab.$tabicon.toggleClass("spin", 0);
-					}
-				}
-		
-				this.update = function(){ return true; };
-		
-				/// Attach target containers for the given document
-				/// @param p_Document : The document for which we have to attach the target containers
-				this.attachTargetContainers = function(p_Document){}; // do nothing here for SVG
-		
-				/// handle a resize action
-				this.doResize = function(){};
-		
-				/// destroy the editor
-				this.destroy = function()
-				{
-					removeEditorFromArray(this);
-					p_Tab.tab.m_Editor = null;
-				};
-		
-				this.getArticleName = function(){ return p_TargetPath; };   ///< @return The name of the article that is being edited
-				this.isModified = function(){ return m_Modified !== null; };         ///< @return true when the content has been modified or false otherwise
-				this.getModifiedTime = function(){ return m_Modified; };        ///< @return the modified time and date
-				/// save the content of the current editor
-				/// @param p_Callback : Callback function that will be called when the save function returns 
-				this.save = function(p_Callback, p_Force)
-				{ 
-					function doSave()
-					{
-						m_bSaving = true;
-						var LastModified = ((m_Modified !== null) ? new Date(m_Modified.getTime()) : new Date());
-						// start a spinner and then start the save operation
-						startSpinner();
-						
-						var HandleResult = function(p_Data)
-						{
-							// stop the spinner when the save function returns
-							stopSpinner();
-							m_bSaving = false;
-		
-							if (p_Data && p_Data.save && p_Data.save.result === 'Success') 
-							{
-								// autosave was temporarly disabled so reanble here again
-								if (m_Autosave == -1)
-								{
-									m_Autosave = 1;
-								}
-								// update last saved text if edit was successful 
-								$m_SavedNotifyTooltip.html($.i18n._("%1$s was successfully saved", [p_TargetPage]));
-								$m_SavedNotifyTooltip.toggleClass("show", true);
-								setTimeout(function()
-								{
-									$m_SavedNotifyTooltip.toggleClass("show", false);
-								}, 500);
-			
-								// on a  successfull save we will reset the modified flag
-								// but only if no further modifications have been made in the mean time
-								if (m_Modified && LastModified.getTime() == m_Modified.getTime())
-								{
-									setModified(null); 
-								}
-								if (p_Callback)
-								{
-									// if a callback function was specified, call it here
-									p_Callback(true);
-								}
-							} 
-							else if (p_Data && p_Data.canceled)
-							{
-								// the action was canceled, keep the data modified but disable autosave temporarly 
-								m_Autosave = -1;
-							}
-							else if (p_Data && p_Data.error) 
-							{
-								$.ViCoWaErrorHandler.showError($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
-								// we had an error, call the callback with false
-								if (p_Callback)
-								{
-									p_Callback(false);        
-								}
-							} 
-							else 
-							{
-								$.ViCoWaErrorHandler.showError($.i18n._("Error: Unknown result from API."));
-								// we had an error, call the callback with false
-								if (p_Callback)
-								{
-									p_Callback(false);        
-								}
-							}
-						};
-						
-						var HandleError = function()
-						{
-							$.ViCoWaErrorHandler.showError($.i18n._("Error: Request failed."));
-							// we had an error, call the callback with false
-							if (p_Callback)
-							{
-								p_Callback(false);        
-							}
-						};
-						
-						m_Editor.getSvgString()(function(p_Data, p_Error)
-						{
-							saveArticle(unescape(m_PageName), p_Data, HandleResult); 
-						});
-					}
-
-					var now = new Date();
-					var MustSave = !m_bSaving && m_Modified !== null && (now.getTime() -  m_Modified.getTime()) > 2000;
-					
-					if (p_Force)
-					{
-						if (m_bSaving)
-						{
-							// popup message box saying that we are already saving to make sure this is what we want
-							$("<div/>").html("<p>The file: <strong>" + unescape(m_PageName).substring(unescape(m_PageName).lastIndexOf("/") + 1) + "</strong> is in the process of being saved to the server, if you think this save operation is not going to finish you can click the <strong>Save now</strong> button to force a new save operation.</p><p>You can click <strong>cancel</strong> to continue to wait for the current save operation to be finished.</p>").appendTo($("body")).dialog(
-							{
-								title: "Save now",
-								resizable: false,
-								height:240,
-								modal: true,
-								buttons: 
-								{
-									"Save now": function() 
-									{
-										$(this).dialog("close");
-										$(this).remove();
-										doSave();
-									},
-									Cancel: function() 
-									{
-										$(this).dialog("close");
-										$(this).remove();
-									}
-								}
-							});
-						}
-						else
-						{
-							doSave();
-						}
-					}
-					else if (MustSave)
-					{
-						doSave();
-					}
-				};
-				
-				/// Update the content of the preview document
-				/// @param p_Content : The modified data
-				this.updateMainContent = function(p_Content)
-				{
-	/*                // go through all editors and update their links 
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index] != This)
-						{
-							p_Content = m_Editors[Index].updateLinks(p_Content);
-						}
-					}
-		
-					/// parse the data that was passed in
-					if (m_$ArticleContentPlaceHolder)
-					{
-					m_$ArticleContentPlaceHolder.html(p_Content);
-					}
-		
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index] != This)
-						{
-							m_Editors[Index].attachTargetContainers(m_PreviewDocument);
-						}
-					}*/
-				};
-		
-				function nextDoc()
-				{
-					
-				}
-				
-				function prevDoc()
-				{
-					
-				}
-		
-				/// event handler for when the data in the editor has changed
-				/// @param p_ChangeModified : true if the change should update the modified state, false otherwise
-				function onEditorChange(p_ChangeModified)
-				{
-					var Content, Index;
-					// only update the modified state when this flag is true
-					if (p_ChangeModified && !m_bLoading)
-					{
-						setModified(new Date());
-					}
-				}
-		
-				// add a reference to this editor to the tab
-				p_Tab.tab.m_Editor = this;                      
-				// insert the editor as the first editor (and thus the active one)
-				m_Editors.splice(0, 0, this);
-				
-				$(p_Tab.editor_container).spin();
-
-				$("<iframe/>").attr("src", "/raw/shared/apps/svg-edit/svg-editor.html").on("load", function()
-				{
-					m_Editor = new embedded_svg_edit(this);    
-					
-					// Hide main button, as we will be controlling new/load/save etc from the host document
-					var doc = this.contentDocument || this.contentWindow.document;
-					var svgEditWindow = this.contentWindow;
-					var mainButton = doc.getElementById('main_button');
-					mainButton.style.display = 'none';            
-					m_Editor.clear();
-
-					// start the spinner and then start loading the document content
-					startSpinner();
-			
-					$.ViCoWaErrorHandler.tryCatchCall(function()
-					{
-						getRawArticle(unescape(m_PageName), function(p_Data)
-						{
-							// the following try catch block is here to make sure the spinner gets stopped even if a problem occurs within the following code
-							$.ViCoWaErrorHandler.tryCatchCall(function()
-							{
-								// when the data has been retrieved, fill tthe editor content and make sure the editor
-								// fits within its container
-								m_bLoading = true;
-								$.ViCoWaErrorHandler.tryCatchCall(function()
-								{
-									m_Editor.setSvgString(p_Data.content);
-								});
-								m_bLoading = false;
-								setModified(null);
-								This.doResize();
-							});
-			
-							// stop the spinner
-							stopSpinner();
-							$(p_Tab.editor_container).spin(false);
-
-							// the first change is from the load so skip that one
-							var bFirst = true;
-							svgEditWindow.svgEditor.addExtension("realtimesavehandler", function() 
-							{
-								return {
-									elementChanged: function()
-									{
-										if (!bFirst)
-										{
-											onEditorChange(true);
-										}
-										bFirst = false;
-									}
-								};
-							});
-						});
-					}, 
-					{
-						catcher: function()
-						{
-							// stop the spinner
-							stopSpinner();
-							$(p_Tab.editor_container).spin(false);
-						}
-					});
-				}).appendTo($("<div/>").addClass("iframe-container").appendTo($(p_Tab.editor_container)));
-			}
-		
-			/// Construct an editor object
-			/// @param p_TargetPath : The name of the article we are editing
-			/// @param p_Tab : The tab associated with the editor, passed in here so it can receive an editor reference
-			/// @param p_Type : The type of the file we will be editing
-			function CEditor(p_TargetPath, p_Tab, p_Type)
-			{
-				var m_Modified = null,                              ///< Keeps track if the editor has modified the file
-				m_bSaving = false,                                  ///< Indicates if a save operation is in progress
-				m_bLoading = false,                                 ///< Indicates if a load operation is in progress
-				m_CodeEditor = ace.edit(p_Tab.editor_container),    ///< The actual editor object 
-				m_TargetContentContainer = [],                      ///< optional container for the data we are editing 
-				m_PageName = /[^=]+$/.exec(p_TargetPath)[0],        ///< The target path to the page stripped from excess data
-				This = this,                                        ///< copy the this pointer in this local object for use in locally scoped functions
-				$ReloadIFrameBtn = null;                            ///< the button for reloading the preview frame 
-				this.m_TabinnerHTMLBackup = null;                   ///< backs up the inner html of the tab when using the load or save spinner
-
-				m_CodeEditor.setBehavioursEnabled(true);        // enable matching of brackets
-				m_CodeEditor.setHighlightActiveLine(true);      // highlight the active line
-				m_CodeEditor.setHighlightSelectedWord(true);    // Highlight the selected word
-				m_CodeEditor.setReadOnly(false);                // set read write
-				m_CodeEditor.setSelectionStyle("line");         // Set selection style to line
-				m_CodeEditor.getSession().setFoldStyle("markbeginend"); // set folding markers to show on end and start
-				m_CodeEditor.setShowFoldWidgets(true);          // set showing of folding widgets
-				m_CodeEditor.setShowInvisibles(true);           // enable showing of space and tab and newline indicator characters
-				m_CodeEditor.getSession().setUseSoftTabs(true); // use soft tabs
-				m_CodeEditor.setOptions({ enableBasicAutocompletion: true });
-				
-				delete m_CodeEditor.commands.commandKeyBinding[1].l;
-				
-				m_CodeEditor.setKeyboardHandler(new HashHandler(
-				{
-					"gotoline" : "ctrl-g",
-					"findnext" : "ctrl-f3|f3",
-					"findprevious" : "ctrl-shift-f3|shift-f3"
-				}));
-
-				// add a reference to this editor to the tab
-				p_Tab.tab.m_Editor = this;                      
-		
-				// create the reload button, which will be a html SPAN object
-				$ReloadIFrameBtn = $("<span></span>").addClass("edit-button").html(m_Icons.reload_frame).attr("title", $.i18n._("Reload the content of the editor preview")).click(function()
-				{
-					$m_TargetIFrame[0].contentDocument.location.reload(true);
-				}).appendTo(p_Tab.tab_button_bar);
-		
-				/// @return the content of the editor, this is the text that is being edited
-				this.getEditorContent = function()
-				{
-					return m_CodeEditor.getSession().getValue();
-				};
-				
-				this.update = function()
-				{
-					return m_CodeEditor.renderer.updateText();
-				};
-
-				/// Attach to or create a style section within the preview document, so we can give realtime feedback
-				/// on the modifications being made in the editor when editing style sheets. This function should only be called when
-				/// we are editing a style sheet
-				function attachStyle()
-				{
-					var Match, Styles, StyleIndex, Style;
-		
-					// set the mode for ACE to css
-					m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "css").Mode)()); 
-					// initialize the target container with an empty array
-					m_TargetContentContainer = [];
-		
-					// we will remove links to the document that is being edited, since an inline style will be taking its place
-					// we don't want the styles in the original version to mix with the ones being changed
-					Match = new RegExp(m_PageName, "i");
-		
-					$("link", $m_TargetIFrame[0].contentDocument).each(function()
-					{
-						if (Match.test(this.href))
-						{
-							$(this).remove();
-						}
-					});
-					$("script", $m_TargetIFrame[0].contentDocument).each(function()
-					{
-						if (Match.test(this.src))
-						{
-							$(this).remove();
-						}
-					});
-		
-					// try to attach to a possible earlier created style element for the page we are editing
-					$("style", $m_TargetIFrame[0].contentDocument).each(function()
-					{
-						if (this.m_OriginalStyleSheet && this.m_OriginalStyleSheet === m_PageName)
-						{
-							m_TargetContentContainer.push(this);
-						}
-					});
-		
-					// if we didn't attach, we create a new style element for realtime feedback
-					if (!m_TargetContentContainer.length)
-					{
-						// create a style element in the document so we can give realtime feedback
-						Style = $m_TargetIFrame[0].contentDocument.createElement("style");
-						Style.m_OriginalStyleSheet = m_PageName;
-						$m_TargetIFrame[0].contentDocument.body.appendChild(Style);
-						m_TargetContentContainer.push(Style);
-					}
-		
-					// call this to do fill the style section with a copy of the current editor data
-					onEditorChange(false);
-				}
-		
-				/// save the javascript if modified and reload it in the preview document
-				function reattachJavascript()
-				{
-					// function thta will do the reloading, should be called after the save operation completes if a save is required
-					function afterSave()
-					{
-						var Match, Scripts, ScriptNode, ScriptsToAdd, DocumentHead, Now;
-						// execute the following events : first calls the reset event. A listener should be added to your code
-						// and should cleanup everything to bring it back into a state as if the javascript has never run before
-						// the page name is passed in so you can execute it for the javascript of the specific page
-						executeEvent("reset", p_TargetPath);
-						// this will unload and then reload the javascript file
-						Match = new RegExp(m_PageName, "i");
-						ScriptsToAdd = [];
-						ScriptNode = null;
-						Now = new Date();
-		
-						// go through all linked scripts in the document
-						$("script", $m_TargetIFrame[0].contentDocument).each(function()
-						{
-							// if we match the script currently being edited
-							if (this.src && Match.test(this.src))
-							{
-								// we only create the new script element if it doesn't exist yet
-								if (!ScriptNode)
-								{
-									// create a new script node
-									ScriptNode = $m_TargetIFrame[0].contentDocument.createElement('script');
-									ScriptNode.setAttribute('type', 'text/javascript');
-									ScriptNode.src = this.src;
-									// replace or append a time stamp to prevent caching
-									if (/time=/.test(ScriptNode.src))
-									{
-										ScriptNode.src = ScriptNode.src.replace(/(time=)\d+/, "$1" + Now.getTime().toString());
-									}
-									else
-									{
-										ScriptNode.src += "&time=" + Now.getTime().toString();
-									}
-									// attach an onload event handler to the script node that will call the load
-									// event handler you can add to your script
-									ScriptNode.onload = function()
-									{
-										// This code should do the same as your onload function normally does if you use an onload handler
-										// again the page name is passed in so you know which on load to use
-										executeEvent("load", p_TargetPath);
-									};
-								}
-								// remove all references of the script from the preview document
-								$(this).remove();
-							}
-						});
-		
-						if (ScriptNode)
-						{
-							// append the script element to the head element of the preview document
-							DocumentHead = $m_TargetIFrame[0].contentDocument.getElementsByTagName('head')[0];
-							DocumentHead.appendChild(ScriptNode);   
-						}
-					}
-					// check if we need to save anything
-					if (This.isModified())
-					{            
-						// save the doument and call the function
-						This.save(afterSave, true);
-					}
-					else
-					{
-						// call the function directly
-						afterSave();
-					}
-				}
-		
-				/// Attach a json document to an ACE editor instance
-				function attachJSON()
-				{
-					m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "json").Mode)()); 
-					m_TargetContentContainer = [];
-				}
-		
-				/// Attach a PHP document to an ACE editor instance
-				function attachPHP()
-				{
-					m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "php").Mode)()); 
-					m_TargetContentContainer = [];
-				}
-		
-				/// attach a javascript document to an ACE editor instance
-				function attachJavascript()
-				{
-					var SaveAndReloadBtn, EvalBtn, EvalSelectionBtn, ViCoWaResetInsertBtn, RedoJavascriptBtn;
-		
-					// set the ACE editor to javascript edit mode
-					m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "javascript").Mode)()); 
-		
-					// create a button used to save and reload the javascript. When the button is clicked, the reset event will be called
-					// after which we will ty to save the editor content and then reload the javascript file by removing and
-					// then re-adding the link to the javascript in the preview document
-					// The advanttage of this function compared to the redo javascript is that errors in the consoe will have proper line numbers for
-					// any possible errors in the script. It is adviced to implement a listener for both the reset and load event
-					// where the load event listener handler would have a "debugger;" statement as its first line. This will
-					// mke sure that your browser's javascript debugger has the proper file active for debugging
-					SaveAndReloadBtn = $("<span></span>").addClass("edit-button").html(m_Icons.save_reload).attr("title", $.i18n._("Save the current file and reload the javascript")).click(function()
-					{
-						//when the button is clicked we will save the javascript and then reload it
-						reattachJavascript();
-					}).appendTo(p_Tab.tab_button_bar);
-		
-					// create the redo javascript button, this will call the reset event followed by eval on the editor content 
-					// followed by the load event. This is similar to the save and reload, without doing the save.
-					// The advantage of this command is that it is fast since it doesn't save your code first, the disadvantage is 
-					// that errors in your javascript will not have give a proper line number in the console. 
-					// Adding the reset and load evet listeners is adviced where it is recommended to have
-					// a "debugger;" statement within the load event handler so the proper instance of javascript objects
-					// is shown in your browsers debugger
-					RedoJavascriptBtn = $("<span></span>").addClass("edit-button").html(m_Icons.redo_javascript).attr("title", $.i18n._("Reload the javascript into the page")).click(function()
-					{
-						// execute the following ViCoWaResetJavascript functions on the iframe. 
-						// first try to call ViCoWaResetJavascript. This function should be added to your code
-						// and should cleanup everything to bring it back into a state as if the javascript has never run before
-						// the page name is passed in so you can execute it for the javascript of the specific page
-						executeEvent("reset", p_TargetPath);
-						// this will reinitialize the code with the current code in the editor
-						$m_TargetIFrame[0].contentWindow.eval(m_CodeEditor.getSession().getValue());
-						// This code should do the same as your onload function normally does if you use an onload handler
-						// again the page name is passed in so you know which pages on load to use
-						executeEvent("load", p_TargetPath);
-					}).appendTo(p_Tab.tab_button_bar);
-		
-					// create the Eval button. clicking this button will call eval with the content of the editor
-					// only call this if your script didn't create any data objects
-					EvalBtn = $("<span/>").addClass("edit-button").html(m_Icons.eval).attr("title", $.i18n._("Run eval on the content of the editor")).click(function()
-					{
-						$m_TargetIFrame[0].contentWindow.eval(m_CodeEditor.getSession().getValue());
-					}).appendTo(p_Tab.tab_button_bar);
-		
-					// create the eval selection button
-					// Call this to call eval on the selected content of your editor, useful when you want to add new code
-					// without reloading your javascript our version of edit and continue
-					EvalSelectionBtn = $("<span/>").addClass("edit-button").addClass("disabled").html(m_Icons.eval_selection).attr("title", $.i18n._("Run eval on the selection")).click(function()
-					{
-						$m_TargetIFrame[0].contentWindow.eval(m_CodeEditor.getSession().doc.getTextRange(m_CodeEditor.getSelectionRange()));
-					}).appendTo(p_Tab.tab_button_bar);
-		
-					// Insert a ViCoWaResetJavascript and a ViCoWaDoLoadJavascript at the cursor
-					// a fast way to add the reset and load event listners to your code
-					ViCoWaResetInsertBtn = $("<span/>").addClass("edit-button").html(m_Icons.insert_resetload).attr("title", $.i18n._("Insert a reset and load events at the cursor")).click(function()
-					{
-						m_CodeEditor.insert("if(parent && parent.ViCoWaEditor)\n{\n    parent.ViCoWaEditor.addEventListener('reset', '" + p_TargetPath + "', function()\n    {\n        // insert your reset code here...\n        return true;\n    });\n\n    parent.ViCoWaEditor.addEventListener('load', '" + p_TargetPath + "', function()\n    {\n        debugger;\n        // insert your load code here...\n        return true;\n    });\n}\n");
-					}).appendTo(p_Tab.tab_button_bar);
-		
-					// add an event handler to be called when the selection in the editor changes
-					m_CodeEditor.getSession().selection.on('changeSelection', function()
-					{
-						var SelectionRange, Selection;
-						// set the eval selection button state depending on if we have a selection or not
-						SelectionRange = m_CodeEditor.getSelectionRange();
-						Selection = m_CodeEditor.getSession().doc.getTextRange(SelectionRange);
-		
-						if (Selection !== null && Selection !== "")
-						{
-							EvalSelectionBtn.className = EvalSelectionBtn.className.replace(/\s+disabled\b/gi, "");
-						}
-						else
-						{
-							if (!/\s+disabled\b/gi.test(EvalSelectionBtn.className))
-							{
-								EvalSelectionBtn.className += " disabled";
-							}
-						}
-					});
-		
-					m_TargetContentContainer = [];
-				}
-		
-				/// replace links to external articles with a div section containing the hexencoded location
-				/// of the original target document
-				/// @param p_Data : The content of the article we are doing this replace for
-				function replaceTemplateLinksWithDiv(p_Data)
-				{
-					var MatchTargetTemplate = new RegExp("\\{\\{[^\}]*" + p_TargetPath + "[^\{\/]*\\}\\}", "i"), 
-					MatchTargetTemplateNoSpace = new RegExp("\\{\\{[^\}]*" + p_TargetPath.replace(/\s/g, "_") + "[^\{\/]*\\}\\}", "i"), 
-					MatchTransclude = new RegExp("transclude=[\"\']" + p_TargetPath + "[\"\']", "i"), 
-					MatchTranscludeNoSpace = new RegExp("transclude=[\"\']" + p_TargetPath.replace(/\s/g, "_") + "[\"\']", "i"), 
-					Index = 1;
-		
-					// replace any reference to the target document with a div
-					while(MatchTargetTemplate.test(p_Data))
-					{
-						p_Data = p_Data.replace(MatchTargetTemplate, "<div id='" + hexEncodeString(p_TargetPath + Index.toString()) + "'></div>");
-						Index++;
-					}
-					while(MatchTargetTemplateNoSpace.test(p_Data))
-					{
-						p_Data = p_Data.replace(MatchTargetTemplateNoSpace, "<div id='" + hexEncodeString(p_TargetPath + Index.toString()) + "'></div>");
-						Index++;
-					}
-					while(MatchTransclude.test(p_Data))
-					{
-						p_Data = p_Data.replace(MatchTransclude, "<div id='" + hexEncodeString(p_TargetPath + Index.toString()) + "'></div>");
-						Index++;
-					}
-					while(MatchTranscludeNoSpace.test(p_Data))
-					{
-						p_Data = p_Data.replace(MatchTranscludeNoSpace, "<div id='" + hexEncodeString(p_TargetPath + Index.toString()) + "'></div>");
-						Index++;
-					}
-		
-					return p_Data;
-				}
-		
-				/// match editors up with the div section that were created for the document being edited by that specific editor
-				/// @param p_Document : The preview document
-				function attachLinkDivs(p_Document)
-				{
-					var Element, Index, EncodedString;
-					Index = 1;
-					// get the first reference element
-					Element = p_Document.getElementById(hexEncodeString(p_TargetPath + Index.toString()));
-		
-					// while reference elements exists, add them to the target containers
-					while (Element)
-					{
-						m_TargetContentContainer.push(Element);
-						Index++;
-						Element = p_Document.getElementById(hexEncodeString(p_TargetPath + Index.toString()));
-					}
-		
-					// if we have any target containers, simulate a document change to update them
-					if (m_TargetContentContainer.length > 0)
-					{
-						onEditorChange(false);
-					}
-				}
-		
-				/// Update the links to the editors or html editors in the given data
-				/// @param p_Data : The data in which the links need to be updated
-				this.updateLinks = function(p_Data)
-				{
-					var Result = p_Data;
-					switch (p_Type)
-					{
-					case EEditorTypes.ET_CSS.id:           // fall trough intentionally
-					case EEditorTypes.ET_JSON.id:           // fall trough intentionally
-					case EEditorTypes.ET_JS.id:     break; // do nothing for javascript, JSON and stylesheets
-					case EEditorTypes.ET_HTML.id:          // fall trough intentionally
-					case EEditorTypes.ET_XML.id:           // fall trough intentionally
-					case EEditorTypes.ET_PLAINTEXT.id:
-						Result = replaceTemplateLinksWithDiv(p_Data);
-						break;
-					}
-		
-					return Result;
-				};
-		
-				/// Attach target containers for the given document
-				/// @param p_Document : The document for which we have to attach the target containers
-				this.attachTargetContainers = function(p_Document)
-				{
-					switch (p_Type)
-					{
-					case EEditorTypes.ET_CSS.id:
-						attachStyle();
-						break;
-					case EEditorTypes.ET_JSON.id:          // fall through intentionally
-					case EEditorTypes.ET_JS.id:            // the JSON and javascript are not attached to a container
-						break;
-					case EEditorTypes.ET_HTML.id:          // fall through intentionally
-					case EEditorTypes.ET_XML.id:           // fall through intentionally
-					case EEditorTypes.ET_PLAINTEXT.id:     
-						attachLinkDivs(p_Document);
-						break;
-					}
-				};
-		
-				/// update the preview document's data for the current editor 
-				function updateContentForNewEditor()
-				{
-					var ContentData;
-		
-					// find the correct editor and get its content
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index].getArticleName() === m_MainArticleName)
-						{
-							ContentData = m_Editors[Index].getEditorContent();
-							break;
-						}
-					}
-					// if we didn't find an editor, use the page's content
-					if (Index == m_Editors.length)
-					{
-						ContentData = m_PageContent;
-					}
-		
-					// replace links to embedded documents with the proper div sections
-					ContentData = This.updateLinks(ContentData);
-		
-					// parse the data and connect to the proper target containers
-					if (m_$ArticleContentPlaceHolder)
-					{
-						// make sure invalid html; doesn't mess up our editor
-						$.ViCoWaErrorHandler.tryCatchCall(function()
-						{
-							// filter scripts when updating the inner html for the main article, because scripts might mess up editing when inline scripts are executed
-							var $Dom = $(ContentData).not("script");
-							if ($Dom)
-							{
-								$Dom.find("script").remove();
-								// save the scroll position of the preview window
-								var ScrollPosX = $("body", m_PreviewDocument).scrollLeft();
-								var ScrollPosY = $("body", m_PreviewDocument).scrollTop();
-								m_$ArticleContentPlaceHolder.empty();
-								$Dom.appendTo(m_$ArticleContentPlaceHolder);
-								// restore the scroll position of the preview window this might not work properly if images finish loading later
-								$("body", m_PreviewDocument).scrollLeft(ScrollPosX);
-								$("body", m_PreviewDocument).scrollTop(ScrollPosY);
-							}
-							else
-							{
-								m_$ArticleContentPlaceHolder.html(ContentData);
-							}
-						});
-					}
-		
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index] != This)
-						{
-							m_Editors[Index].attachTargetContainers(m_PreviewDocument);
-						}
-					}
-					This.attachTargetContainers(m_PreviewDocument);
-				}
-		
-				/// Set the modified date/time for the active editor
-				/// @param p_Modified : The new modified time, a time for modified null for NOT modified
-				function setModified(p_Modified)
-				{
-					m_Modified = p_Modified;
-					if (m_Modified !== null)
-					{
-						if (!/\s+modified\b/gi.test(p_Tab.tab.className))
-						{
-							p_Tab.tab.className += " modified";
-						}
-					}
-					else
-					{
-						p_Tab.tab.className = p_Tab.tab.className.replace(/\s+modified\b/gi, "");
-					}
-				}
-		
-				/// Start the spinning circle animation in the editor tab to indicate save or load on an editor
-				function startSpinner()
-				{
-					// check if one is already running
-					if (!This.m_TabinnerHTMLBackup)
-					{
-						This.m_TabinnerHTMLBackup = p_Tab.$tabicon.css("background-image");
-						p_Tab.$tabicon.css("background-image", "url('" + ViCowaEditorBasePath + "/images/spincircle.svg')");             
-						p_Tab.$tabicon.toggleClass("spin", 1);
-					}
-				}
-		
-				/// Stop the spinning circle animation in the editor tab
-				function stopSpinner()
-				{
-					// check if one is running
-					if (This.m_TabinnerHTMLBackup)
-					{
-						p_Tab.$tabicon.css("background-image", This.m_TabinnerHTMLBackup);
-						This.m_TabinnerHTMLBackup = null;
-						p_Tab.$tabicon.toggleClass("spin", 0);
-					}
-				}
-		
-				/// handle a resize action
-				this.doResize = function()
-				{
-					m_CodeEditor.resize();
-				};
-		
-				/// destroy the editor
-				this.destroy = function()
-				{
-					removeEditorFromArray(this);
-					m_CodeEditor.destroy();
-					p_Tab.tab.m_Editor = null;
-				};
-		
-				this.getArticleName = function(){ return p_TargetPath; };   	///< @return The name of the article that is being edited
-				this.isModified = function(){ return m_Modified !== null; };    ///< @return true when the content has been modified or false otherwise
-				this.getModifiedTime = function(){ return m_Modified; };        ///< @return the modified time and date
-				/// save the content of the current editor
-				/// @param p_Callback : Callback function that will be called when the save function returns 
-				this.save = function(p_Callback, p_Force)
-				{ 
-					function doSave()
-					{
-						m_bSaving = true;
-						var LastModified = ((m_Modified !== null) ? new Date(m_Modified.getTime()) : new Date());
-						// start a spinner and then start the save operation
-						startSpinner();
-						
-						var HandleResult = function(p_Data)
-						{
-							// stop the spinner when the save function returns
-							stopSpinner();
-							m_bSaving = false;
-		
-							if (p_Data && p_Data.save && p_Data.save.result === 'Success') 
-							{
-								// autosave was temporarly disabled so reanble here again
-								if (m_Autosave == -1)
-								{
-									m_Autosave = 1;
-								}
-								// update last saved text if edit was successful 
-								$m_SavedNotifyTooltip.html($.i18n._("%1$s was successfully saved", [p_TargetPage]));
-								$m_SavedNotifyTooltip.toggleClass("show", true);
-								setTimeout(function()
-								{
-									$m_SavedNotifyTooltip.toggleClass("show", false);
-								}, 500);
-			
-								// on a  successfull save we will reset the modified flag
-								// but only if no further modifications have been made in the mean time
-								if (m_Modified && LastModified.getTime() == m_Modified.getTime())
-								{
-									setModified(null); 
-								}
-								if (p_Callback)
-								{
-									// if a callback function was specified, call it here
-									p_Callback(true);
-								}
-							} 
-							else if (p_Data && p_Data.canceled)
-							{
-								// the action was canceled, keep the data modified but disable autosave temporarly 
-								m_Autosave = -1;
-							}
-							else if (p_Data && p_Data.error) 
-							{
-								$.ViCoWaErrorHandler.showError($.i18n._("Error: API returned error: %1$s", [p_Data.error]));
-								// we had an error, call the callback with false
-								if (p_Callback)
-								{
-									p_Callback(false);        
-								}
-							} 
-							else 
-							{
-								$.ViCoWaErrorHandler.showError($.i18n._("Error: Unknown result from API."));
-								// we had an error, call the callback with false
-								if (p_Callback)
-								{
-									p_Callback(false);        
-								}
-							}
-						};
-						
-						var HandleError = function()
-						{
-							$.ViCoWaErrorHandler.showError($.i18n._("Error: Request failed."));
-							// we had an error, call the callback with false
-							if (p_Callback)
-							{
-								p_Callback(false);        
-							}
-						};
-						
-						saveArticle(unescape(m_PageName), m_CodeEditor.getSession().getValue(), HandleResult); 
-					}
-
-					var now = new Date();
-					var MustSave = !m_bSaving && m_Modified !== null && (now.getTime() -  m_Modified.getTime()) > 2000;
-					
-					if (p_Force)
-					{
-						if (m_bSaving)
-						{
-							// popup message box saying that we are already saving to make sure this is what we want
-							$("<div/>").html("<p>The file: <strong>" + unescape(m_PageName).substring(unescape(m_PageName).lastIndexOf("/") + 1) + "</strong> is in the process of being saved to the server, if you think this save operation is not going to finish you can click the <strong>Save now</strong> button to force a new save operation.</p><p>You can click <strong>cancel</strong> to continue to wait for the current save operation to be finished.</p>").appendTo($("body")).dialog(
-							{
-								title: "Save now",
-								resizable: false,
-								height:240,
-								modal: true,
-								buttons: 
-								{
-									"Save now": function() 
-									{
-										$(this).dialog("close");
-										$(this).remove();
-										doSave();
-									},
-									Cancel: function() 
-									{
-										$(this).dialog("close");
-										$(this).remove();
-									}
-								}
-							});
-						}
-						else
-						{
-							doSave();
-						}
-					}
-					else if (MustSave)
-					{
-						doSave();
-					}
-				};
-				
-				/// Update the content of the preview document
-				/// @param p_Content : The modified data
-				this.updateMainContent = function(p_Content)
-				{
-					// go through all editors and update their links 
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index] != This)
-						{
-							p_Content = m_Editors[Index].updateLinks(p_Content);
-						}
-					}
-		
-					/// parse the data that was passed in
-					if (m_$ArticleContentPlaceHolder)
-					{
-						// make sure invalid html; doesn't mess up our editor
-						$.ViCoWaErrorHandler.tryCatchCall(function()
-						{
-							// filter scripts when updating the inner html for the main article, because scripts might mess up editing when inline scripts are executed
-							var $Dom = $(p_Content).not("script");
-							if ($Dom)
-							{
-								$Dom.find("script").remove();
-								// save the scroll position of the preview window
-								var ScrollPosX = $("body", m_PreviewDocument).scrollLeft();
-								var ScrollPosY = $("body", m_PreviewDocument).scrollTop();
-								m_$ArticleContentPlaceHolder.empty();
-								$Dom.appendTo(m_$ArticleContentPlaceHolder);
-								// restore the scroll position of the preview window this might not work properly if images finish loading later
-								$("body", m_PreviewDocument).scrollLeft(ScrollPosX);
-								$("body", m_PreviewDocument).scrollTop(ScrollPosY);
-							}
-							else
-							{
-								m_$ArticleContentPlaceHolder.html(p_Content);
-							}
-						});
-					}
-		
-					for (Index = 0; Index < m_Editors.length; Index++)
-					{
-						if (m_Editors[Index] != This)
-						{
-							m_Editors[Index].attachTargetContainers(m_PreviewDocument);
-						}
-					}
-				};
-		
-				function nextDoc()
-				{
-					
-				}
-				
-				function prevDoc()
-				{
-					
-				}
-		
-				/// event handler for when the data in the editor has changed
-				/// @param p_ChangeModified : true if the change should update the modified state, false otherwise
-				function onEditorChange(p_ChangeModified)
-				{
-					var Content, Index;
-					// only update the modified state when this flag is true
-					if (p_ChangeModified && !m_bLoading)
-					{
-						setModified(new Date());
-					}
-		
-					// this code is only executed for visual document type editors
-					if (p_Type !== EEditorTypes.ET_JS.id && p_Type !== EEditorTypes.ET_JSON.id)
-					{
-						Content = m_CodeEditor.getSession().getValue();
-						// if target containers are set, fill their content with the content of the editor
-						if (m_TargetContentContainer.length !== 0)
-						{
-							for (Index = 0; Index < m_TargetContentContainer.length; Index++)
-							{
-								m_TargetContentContainer[Index].innerHTML = Content;
-							}
-						}
-						else if (p_TargetPath === m_MainArticleName)
-						{
-							This.updateMainContent(Content);
-						}
-					}
-				}
-
-				// start code execution here
-				/// Connect the change event handler to the editor
-				m_CodeEditor.getSession().on('change', function()
-				{
-					onEditorChange(true);
-				});
-		
-				/// Set our own key shortcuts
-				m_CodeEditor.commands.addCommands(
-				[
-					{
-						name: 'Save',
-						bindKey:
-						{
-							win: 'Ctrl-s',
-							mac: 'Command-s',
-							sender: 'editor'
-						},
-						exec: function(/*env, args, request*/)
-						{
-							saveEditorContent();   
-						}
-					},
-					{
-						name: "showKeyboardShortcuts",
-						bindKey: 
-						{ 
-							win: "Ctrl-Alt-h", 
-							mac: "Command-Alt-h"
-						},
-						exec: function(editor) 
-						{
-							config.loadModule("ace/ext/keybinding_menu", function(module) 
-							{
-								module.init(editor);
-								editor.showKeyboardShortcuts();
-							});
-						}
-					},
-					{
-						name: "nextFile",
-						bindKey: "Ctrl-tab",
-						exec: function(editor) { nextDoc(); },
-						readOnly: true
-					}, 
-					{
-						name: "previousFile",
-						bindKey: "Ctrl-shift-tab",
-						exec: function(editor) { prevDoc(); },
-						readOnly: true
-					},
-				]);
-		
-				// insert the editor as the first editor (and thus the active one)
-				m_Editors.splice(0, 0, this);
-				
-				// set up the editor for the proper document type
-				switch (p_Type)
-				{
-					case EEditorTypes.ET_CSS.id:   
-						attachStyle();
-					break;
-					case EEditorTypes.ET_JSON.id:
-						attachJSON();
-					break;
-					case EEditorTypes.ET_JS.id:    
-						attachJavascript();
-					break;
-					case EEditorTypes.ET_PHP.id:
-						attachPHP();
-					break;
-					case EEditorTypes.ET_XML.id:
-						m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "xml").Mode)()); 
-						m_TargetContentContainer = [];
-					break;
-					case EEditorTypes.ET_HTML.id:  
-						m_CodeEditor.getSession().setMode(new (require("ace/mode/" + "html").Mode)()); 
-						m_TargetContentContainer = [];
-						updateContentForNewEditor();
-						break;
-					case EEditorTypes.ET_PLAINTEXT.id:
-						m_TargetContentContainer = [];
-						updateContentForNewEditor();
-					break;
-				}
-
-				// start the spinner and then start loading the document content
-				startSpinner();
-		
-				$.ViCoWaErrorHandler.tryCatchCall(function()
-				{
-					getRawArticle(unescape(m_PageName), function(p_Data)
-					{
-						// the following try catch block is here to make sure the spinner gets stopped even if a problem occurs within the following code
-						$.ViCoWaErrorHandler.tryCatchCall(function()
-						{
-							// when the data has been retrieved, fill tthe editor content and make sure the editor
-							// fits within its container
-							m_bLoading = true;
-							$.ViCoWaErrorHandler.tryCatchCall(function()
-							{
-								m_CodeEditor.getSession().setValue(p_Data.content);
-							});
-							m_bLoading = false;
-							setModified(null);
-							This.doResize();
-		
-							switch (p_Type)
-							{
-								case EEditorTypes.ET_CSS.id:    //  fall through intentionally
-								case EEditorTypes.ET_JSON.id:
-								break;
-								case EEditorTypes.ET_JS.id:    
-									reattachJavascript();
-								break;
-								case EEditorTypes.ET_HTML.id:  //  fall through intentionally
-								case EEditorTypes.ET_XML.id:
-									break;
-								case EEditorTypes.ET_PLAINTEXT.id: 
-								break;
-							}
-						});
-		
-						// stop the spinner
-						stopSpinner();
-					});
-				},
-				{
-					catcher: function()
-					{
-						// stop the spinner
-						stopSpinner();
-					}
-				});
-			}
-		
 			/// Close the given tab, this will first test if the content for the editor for the given tab 
 			/// has not been modified and will ask the user to save if it is at which time he can save or not save or cancel the close
 			/// @param p_Tab : The tab that we are trying to close
-			function closeTab(p_Tab)
+            function closeTab($p_Tab)
 			{
 				var Dialog;
 				// check if the editor is modified
-				if (p_Tab.m_Editor && typeof p_Tab.m_Editor.isModified !== "undefined" && p_Tab.m_Editor.isModified())
+				if ($p_Tab[0].m_Editor && typeof $p_Tab[0].m_Editor.isModified !== "undefined" && $p_Tab[0].m_Editor.isModified())
 				{
 					// popup dialog here. The article ... has been modified, do you want to save it. Yes | No | Cancel
-					Dialog = $("<div title='Unsaved changes detected'>" + $.i18n._("The article %1$s has been modified, do you want to save it?", [p_Tab.m_Editor.getArticleName()]) + " </div>");
+					Dialog = $("<div title='Unsaved changes detected'>" + $.i18n._("The article %1$s has been modified, do you want to save it?", [$p_Tab[0].m_Editor.getArticleName()]) + " </div>");
 					$(Dialog).dialog(
 					{
 						modal: true,
@@ -1989,14 +711,14 @@ define([
 								click: function()
 								{
 									$(Dialog).remove();
-									p_Tab.m_Editor.save(function(p_Success)
+									$p_Tab[0].m_Editor.save(function(p_Success)
 									{
 										// only close the tab if the save was successfull
 										if (p_Success)
 										{
-											p_Tab.m_Editor.destroy();
-											p_Tab.m_TabContent.parentNode.removeChild(p_Tab.m_TabContent);
-											p_Tab.parentNode.removeChild(p_Tab);
+											$p_Tab[0].m_Editor.destroy();
+											$p_Tab[0].$m_TabContent.remove();
+											$p_Tab.remove();
 										}
 									});
 								}
@@ -2007,9 +729,9 @@ define([
 								{
 									// create the No button, when clicked will just destroy the editor and cose the tab without saving
 									$(Dialog).remove();
-									p_Tab.m_Editor.destroy();
-									p_Tab.m_TabContent.parentNode.removeChild(p_Tab.m_TabContent);
-									p_Tab.parentNode.removeChild(p_Tab);
+									$p_Tab[0].m_Editor.destroy();
+									$p_Tab[0].$m_TabContent.remove();
+									$p_Tab.remove();
 								}
 							},
 							{
@@ -2028,9 +750,9 @@ define([
 				}
 				else // if the article was not modified will just destroy the editor and close the tab without asking questions
 				{
-					p_Tab.m_Editor.destroy();
-					p_Tab.m_TabContent.parentNode.removeChild(p_Tab.m_TabContent);
-					p_Tab.parentNode.removeChild(p_Tab);
+					$p_Tab[0].m_Editor.destroy();
+					$p_Tab[0].$m_TabContent.remove();
+					$p_Tab.remove();
 				}
 				
 				$(window).trigger("resize");
@@ -2039,67 +761,63 @@ define([
 			/// create a new editor tab
 			/// @param p_TabName : The name to show on the tab
 			/// @param p_TabTitle : tooltip shown when hovering the tab, most common use is to show the full article path
-			/// @param p_Type : The document type for the new editor
-			function createTab(p_TabName, p_TabTitle, p_Type)
+			/// @param p_IconRetriever : a function to retrieve the icon
+			function createTab(p_TabName, p_TabTitle, p_Template, p_IconRetriever, p_Callback)
 			{
-				var Tab, TabText, TabContent, TabButtonBar, EditorContainer, CloseBtn, $TabIcon;
-				// tabs are created as list items
-				Tab = document.createElement("li");
-				Tab.className = "tab";
-				Tab.title = p_TabTitle;
-				$m_TabList[0].appendChild(Tab);
-				$TabIcon = $("<span/>").addClass("tab-icon").appendTo(Tab);
-				MimeTypeImageRetriever.getMimeTypeImagePath(p_Type.extension, function(p_Path)
+				$m_TabList.load("/htmltemplates/tab.html .tab", function()
 				{
-					if (Tab.m_Editor && Tab.m_Editor.m_TabinnerHTMLBackup !== null)
+					var Now = new Date();
+					var TabID = Now.getTime() + MakeHash(p_TabName);
+					
+					// tabs are created as list items
+					var $Tab = $(this).find(".tab").attr("title", p_TabTitle).addClass("id", TabID).on("click", function()
 					{
-						Tab.m_Editor.m_TabinnerHTMLBackup = "url('" + p_Path  + "')";    
-					}
-					else
+						// when the tab is clicked it should activate itself
+						setActiveEditor($Tab.m_Editor);
+					}), 
+					$TabIcon = $(this).find(".tab-icon"),
+					$TabText = $(this).find(".tabtext").html(p_TabName), 
+					$TabContent, 
+					$TabButtonBar, 
+					$EditorContainer, 
+					// the tab close button is owned by the tab
+					$CloseBtn = $(this).find("tab-close").attr("title", $.i18n._("Close")).on("click", function()
 					{
-						$TabIcon.css("background-image", "url('" + p_Path  + "')");
-					}
-				});
-				TabText = document.createElement("span");
-				TabText.innerHTML = p_TabName;
-				TabText.className = "tabtext";
-				Tab.appendChild(TabText);
-				// the tab content will be separate from the tab itself
-				TabContent = document.createElement("div");
-				TabContent.className = "noselect tab-content";
-				// a div to contain editor specific command buttons
-				TabButtonBar = document.createElement("div");
-				TabButtonBar.className = "tab-specific-button-bar";
-				TabContent.appendChild(TabButtonBar);
-				// the DIV that will be used for the editor is owned by the tab content
-				EditorContainer = document.createElement("div");
-				EditorContainer.className = "editor-tab-content";
-				TabContent.appendChild(EditorContainer);
-				Tab.m_TabContent = TabContent;
-				// tab starts of inactive
-				Tab.m_Active = false;
-				// when the tab is clicked it should activate itself
-				$(Tab).on("click", function()
-				{
-					setActiveEditor(Tab.m_Editor);
-				});
-				// the tab close button is owned by the tab
-				CloseBtn = document.createElement("span");
-				CloseBtn.className = "tab-close";
-				CloseBtn.innerHTML = m_Icons.close;
-				CloseBtn.title = $.i18n._("Close");
-				// when the lose button is clicked, the tab close function is called (which will check if the content has been modified before closing it)
-				$(CloseBtn).on("click", function()
-				{
-					closeTab(Tab);
-				});
-				Tab.appendChild(CloseBtn);
-				$m_TabBar[0].appendChild(TabContent);
+						// when the close button is clicked, the tab close function is called (which will check if the content has been modified before closing it)
+						closeTab($Tab);
+					});
+					
+					p_IconRetriever(p_TabTitle, function(p_Path)
+					{
+						if ($Tab[0].m_Editor && $Tab[0].m_Editor.m_TabinnerHTMLBackup !== null)
+						{
+							$Tab[0].m_Editor.m_TabinnerHTMLBackup = "url('" + p_Path  + "')";    
+						}
+						else
+						{
+							$TabIcon.css("background-image", "url('" + p_Path  + "')");
+						}
+					});
+					
+					$m_TabBar.find(".editorspace").load(p_Template, function()
+					{
+						// the tab content will be separate from the tab itself
+						$TabContent = $(".tab-content").addClass("id", TabID);
+						// a div to contain editor specific command buttons
+						$TabButtonBar = $(".tab-specific-button-bar");
+						// the DIV that will be used for the editor is owned by the tab content
+						$EditorContainer = $(".editor-tab-content");
+						
+						$Tab[0].$m_TabContent = $TabContent;
+						// tab starts of inactive
+						$Tab[0].m_Active = false;
+						
+						$(window).trigger("resize");
 				
-				$(window).trigger("resize");
-		
-				// return the tab so we can attach the editor object
-				return { tab: Tab, content: TabContent, editor_container: EditorContainer, tab_button_bar: TabButtonBar, $tabicon: $TabIcon  };
+						// return the tab so we can attach the editor object
+						p_Callback({ $Tab: $Tab, content: $TabContent, editor_container: $EditorContainer, tab_button_bar: $TabButtonBar, $tabicon: $TabIcon, id: TabID });
+					});
+				});
 			}
 		
 			/// open the editor for the given article and type, create one if no editor exists yet for this article
@@ -2124,12 +842,14 @@ define([
 				// if not, create a new editor tab here
 				if (MatchingEditor === null)
 				{
-					TabInfo = createTab(/[^\/:]+$/.exec(p_Path)[0], p_Path, p_Type);
-					TabInfo.tab.className += " active";
-					TabInfo.tab.m_TabContent.className += " visible";
-					MatchingEditor = editorFactory(p_Path, TabInfo, p_Type.type);
-					// set the editor active
-					setActiveEditor(MatchingEditor);
+					m_EditorFactories.every(function(p_Element)
+					{
+						return !p_Element.startEditFile(p_Path, { createTab: createTab }, function(p_Editor)
+						{
+							// set the editor active
+							setActiveEditor(p_Editor);
+						});
+					});
 				}
 				else
 				{
@@ -2138,21 +858,6 @@ define([
 				}
 			}
 			
-			function editorFactory(p_Path, TabInfo, p_Type)
-			{
-				var Editor = null;
-				if (p_Type === EEditorTypes.ET_SVG.id)
-				{
-					Editor = new CSVGEditor(p_Path, TabInfo);
-				}
-				else
-				{
-					Editor = new CEditor(p_Path, TabInfo, p_Type);
-				}
-				
-				return Editor;
-			}
-		
 			/// Show the open dialog so you can select the editors to create
 			function openEditors()
 			{
@@ -2337,13 +1042,13 @@ define([
 					var IconName = "";
 					switch(DocInfo.type)
 					{
-					case EEditorTypes.ET_CSS.id:       IconName = "css"; break;
-					case EEditorTypes.ET_JS.id:        IconName = "js"; break;
-					case EEditorTypes.ET_HTML.id:      IconName = "html"; break;
-					case EEditorTypes.ET_XML.id:       IconName = "xml"; break;
-					case EEditorTypes.ET_PLAINTEXT.id: IconName = "txt"; break;
-					case EEditorTypes.ET_JSON.id:      IconName = "json"; break;
-					default:                        IconName = ""; break;
+					case EEditorTypes.ET_CSS.id:        IconName = "css"; break;
+					case EEditorTypes.ET_JS.id:         IconName = "js"; break;
+					case EEditorTypes.ET_HTML.id:       IconName = "html"; break;
+					case EEditorTypes.ET_XML.id:        IconName = "xml"; break;
+					case EEditorTypes.ET_PLAINTEXT.id:  IconName = "txt"; break;
+					case EEditorTypes.ET_JSON.id:       IconName = "json"; break;
+					default:                            IconName = ""; break;
 					}
 					
 					applyIcon(DocListIconSpan, IconName);
@@ -2635,16 +1340,15 @@ define([
 			};
 		
 			// the main dom element for the inplace editor
-			$m_InplaceEditor = $("<div/>").addClass("vicowa-editor");
+			$m_InplaceEditor = $(".vicowa-editor");
 			// target section items
-			$m_InplaceTargetSection = $("<div/>").addClass("target-section").appendTo($m_InplaceEditor);
+			$m_InplaceTargetSection = $(".target-section");
 			// target iframe
-			$m_TargetIFrame = $("<iframe/>").addClass("target-iframe").appendTo($m_InplaceTargetSection);
+			$m_TargetIFrame = $(".target-iframe");
 			// editor section items
-			$m_InplaceEditorSection = $("<div/>").addClass("noselect").addClass("editor-section").appendTo($m_InplaceEditor);
+			$m_InplaceEditorSection = $(".editor-section");
 			// Gripper used for resizing
-			$m_Gripper = $("<div/>").addClass("gripper").appendTo($m_InplaceEditorSection);
-			$m_Gripper.draggable(
+			$(".gripper").draggable(
 			{
 				iframeFix: true,
 				axis: "y",
@@ -2655,15 +1359,12 @@ define([
 				{
 					$m_InplaceEditorSection.css("top", p_UI.offset.top + "px");
 					$m_InplaceTargetSection.css("bottom", $m_InplaceEditor.height() - p_UI.offset.top + "px");
-					resizeCodeEditors();
+                    resizeCodeEditors();
 				}
 			});
-			// editor container
-			$m_EditorContainer = $("<div/>").addClass("container").appendTo($m_InplaceEditorSection);
 			// common controls
 			// tab bar
-			$m_TabBar = $("<div/>").addClass("tabbar").appendTo($m_EditorContainer);
-			var $Sizingcontainer = $("<div/>").addClass("tabbarsizing").appendTo($m_TabBar);
+			$m_TabBar = $(".tabbar");
 			var scrollleftTimeout = 0;
 			var scrollleftInterval = 0;
 			var scrollrightTimeout = 0;
@@ -2691,7 +1392,7 @@ define([
 				}
 			};
 			
-			var $ScrollLeft = $("<input type='button' class='scroll-left' value='&lt;'/>").appendTo($Sizingcontainer);
+			var $ScrollLeft = $(".scroll-left");
 			$ScrollLeft.mousedown(function()
 			{
 				scrollLeft();
@@ -2713,9 +1414,10 @@ define([
 				clearInterval(scrollleftInterval);
 			});
 
-			var $TabScrollContainer = $("<div/>").addClass("scrollcontainer").appendTo($Sizingcontainer);
-			$m_TabList = $("<ul/>").addClass("tab-list").appendTo($TabScrollContainer);
-			var $ScrollRight = $("<input type='button' class='scroll-right' value='&gt;'/>").appendTo($Sizingcontainer);
+			var $TabScrollContainer = $(".scrollcontainer"),
+			$ScrollRight = $(".scroll-right");
+			$m_TabList = $(".tab-list");
+			
 			$ScrollRight.mousedown(function()
 			{
 				scrollRight();
@@ -2757,13 +1459,6 @@ define([
 				checkScroller();
 			});
 			
-			$m_ButtonBar = $("<div/>").addClass("button-bar").appendTo($m_EditorContainer);
-			// select files to edit button
-			$m_OpenButton = $("<span/>").addClass("edit-button").addClass("disabled").attr("title", $.i18n._("Open articles for editing")).html(m_Icons.open).appendTo($m_EditorContainer);
-		
-			// directory browse button
-			$m_DirectorBrowseButton = $("<span/>").addClass("edit-button").attr("title", $.i18n._("Open articles for editing")).html(m_Icons.open).appendTo($m_EditorContainer);
-			
 			function getValueTypeByExtension(p_Path)
 			{
 				var LastIndex = p_Path.lastIndexOf(".");
@@ -2796,7 +1491,7 @@ define([
 				return location.protocol + "//" + location.host + p_Path;
 			}
 		
-			$m_DirectorBrowseButton.on("click", function()
+			$(".open-button").on("click", function()
 			{
 				FileOpenDialog.create({}, function(p_Result)
 				{
@@ -2805,37 +1500,37 @@ define([
 						p_Result.selected.forEach(function(p_Element)
 						{
 							openEditorTab(getFullPath(p_Element.path), getValueTypeByExtension(p_Element.path));
-						})
+						});
 					}
 				});
-			})
+			});
 
 			// save button
-			$m_SaveButton = $("<span></span>").addClass("edit-button").addClass("disabled").html(m_Icons.save).attr("title", $.i18n._("Save")).click(function()
+			$m_SaveButton = $("save-button").click(function()
 			{
 				if (!$(this).hasClass("disabled"))
 				{
 					saveEditorContent();
 				}
-			}).appendTo($m_EditorContainer);
+			});
 			// save all button
-			$m_SaveAllButton = $("<span></span>").addClass("edit-button").addClass("disabled").html(m_Icons.saveall).attr("title", $.i18n._("Save all")).click(function()
+			$m_SaveAllButton = $("saveall-button").click(function()
 			{
 				if (!$(this).hasClass("disabled"))
 				{
 					saveAllContent();
 				}
-			}).appendTo($m_EditorContainer);
+			});
 			// version control button
-			$m_VersionControlButton = $("<span></span>").addClass("versioncontrol-button").html(m_Icons.versioncontrol).attr("title", $.i18n._("Version control")).click(startViCoWaGit).appendTo($m_EditorContainer);
+			$(".versioncontrol-button").click(startViCoWaGit);
 			
 			// close editor button
-			$m_CloseButton = $("<span></span>").addClass("close-button").attr("title", $.i18n._("Close the editor")).html(m_Icons.close).click(function()
+			$(".close-button").click(function()
 			{
 				closeViCoWaEditor(0);
-			}).appendTo($m_EditorContainer);
+			});
 		
-			$m_SavedNotifyTooltip = $("<div></div>").addClass("saved-notify-popup").appendTo($m_InplaceEditor);
+			$m_SavedNotifyTooltip = $(".saved-notify-popup");
 		
 			$ProgressText.text("Loading: Preview content ...");
 			if (m_EditTargetLocation)
@@ -2970,8 +1665,6 @@ define([
 		
 			// prevent scroll bars for the special page
 			$("html").css("overflow", "hidden");
-			// create the area for the editor
-			$m_InplaceEditor.appendTo(document.body);
 			
 			updateSizes();
 		
@@ -3024,7 +1717,6 @@ define([
 					"purl", 
 					"jquery.ba-bbq",
 					"amplify",
-/*					"apps/svg-edit/embedapi"*/
 					], function(p_Ace)
 			{
 				$ProgressText.text("Loading: Helper objects...");
@@ -3035,11 +1727,9 @@ define([
 				[
 					"i18n/en_EN", 
 					"aes/autoencrypt", 
-//					"jqueryplugin/jquery.ui.touch-punch/jquery.ui.touch-punch.min",
-//					"jqueryplugin/jquery.serverBrowser/jquery.serverBrowser"
 				], function(dummy, autoEncrypt)
 				{
-//					$ProgressText.text("Loading: Editor modes...");
+					$ProgressText.text("Loading: Editor modes...");
 					require(
 						[    
 							"ace/mode/c_cpp",
@@ -3060,15 +1750,37 @@ define([
 							"ace/mode/svg",
 							"ace/mode/textile",
 							"ace/mode/xml",
+							"ace/mode/plain_text",
 							"ace/ext/language_tools"
 						], function()
 					{
-						$ProgressText.text("Creating: ViCoWaEditor instance ...");
-//						$.addCSS("/jquery.serverBrowser/jquery.serverBrowser.css");
-						
-						ViCoWaLogin.ensureLoggedIn(function()
+						var EditorFactoryPath = "/editors/";
+						$ProgressText.text("Loading: Editor factories ...");
+
+						// get all the editors
+						$.getJSON(EditorFactoryPath + "editors.json", function(p_Data)
 						{
-							window.ViCoWaEditor = new CViCoWaEditor(decodeURIComponent($.url(document.location).param('url')), autoEncrypt, p_Ace);
+							var Required = [];
+							p_Data.editors.forEach(function(p_Element)
+							{
+								Required.push(EditorFactoryPath + p_Element);
+							});
+
+							require(Required, function()
+							{
+								var Index = 0;
+								for (Index = 0; Index < arguments.length; Index++)
+								{
+									m_EditorFactories.push(arguments[Index]);
+								}
+								
+								$ProgressText.text("Creating: ViCoWaEditor instance ...");
+								
+								ViCoWaLogin.ensureLoggedIn(function()
+								{
+									window.ViCoWaEditor = new CViCoWaEditor(null, autoEncrypt, p_Ace);
+								});
+							});
 						});
 					});
 				});

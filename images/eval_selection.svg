@@ -1,6 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">
-    <g class="button-icon">
-        <rect width="8" height="10" x="5" y="1" style="fill:#0000ff;stroke:none;" />
-        <text style="font-size:10px;font-family:Arial;"><tspan x="0" y="8">(\'<tspan style="fill:#ffffff;">x;</tspan>\')</tspan></text>
-    </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   style="width: 20px; height: 16px;"
+   viewBox="0 0 20 16"
+   id="svg2"
+   inkscape:version="0.48.4 r9939"
+   width="100%"
+   height="100%"
+   sodipodi:docname="eval_selection.svg">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="14.75"
+     inkscape:cx="10"
+     inkscape:cy="8"
+     inkscape:window-x="653"
+     inkscape:window-y="272"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <g
+     class="button-icon"
+     id="g4"
+     transform="matrix(0.76845137,0,0,1,0.0927099,2.1016949)">
+    <rect
+       width="8"
+       height="10"
+       x="5"
+       y="1"
+       style="fill:#0000ff;stroke:none"
+       id="rect6" />
+    <text
+       style="font-size:10px;font-family:Arial"
+       id="text8">
+      <tspan
+         x="0"
+         y="8"
+         id="tspan10">(\'<tspan
+   style="fill:#ffffff"
+   id="tspan12">x;</tspan>
+\')</tspan>
+    </text>
+  </g>
 </svg>

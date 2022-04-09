@@ -5,6 +5,16 @@
 		exit;
 	}
 
+	/// Retrieve the extension from the given path
+	/// @param $p_FilePath : The path from which we are retrieving the extension
+	/// @return the extension for the given path
+	function GetExtension($p_FilePath)
+	{
+		$Items = explode('.', $p_FilePath);
+		$ext = array_pop($Items);
+		return strtolower($ext);
+	}
+	
 	// write the given file to disk
 	// @param $p_FilePath : Path to where the file should be written
 	// @param $p_Data : Data to be written into the file

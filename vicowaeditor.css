@@ -40,6 +40,11 @@
     background-color: #DDD;
     height: auto;
 }
+
+.vicowaeditor
+{
+	font-size: 12px;
+}
  
 .vicowa-editor .resize-overlay
 {
@@ -117,7 +122,7 @@
 {
     margin: 0;
 }
- 
+
 .vicowa-editor .tabbar ul li
 {
     position: relative;
@@ -155,10 +160,10 @@
 .vicowa-editor .tabbar .tabbarsizing
 {
     position: absolute;
-    top: 0;
+    top: .1em;
     left: 8em;
     right: 6em;
-    height: 29px;
+    height: 2.2em;
 }
 
 .vicowa-editor .tabbar .tabbarsizing .scroll-left,
@@ -220,24 +225,24 @@
     float: none;
 }
  
-.vicowa-editor .tab-content
-{
-    position: absolute; 
-    top: 1.8em; 
-    left: 0; 
-    right: 0;
-    bottom: 0;
-    border-top: 1px solid grey;
-    display: none;
-    box-shadow: 0 0 3px Gray;
-}
- 
 .vicowa-editor .tab-close
 {
     width: 1.2em;
     right: 0;
+	top: 0;
     cursor: default;
     position: absolute;
+}
+
+.vicowa-editor .editorspace
+{
+	position: absolute;
+	left: 0;
+	top: 2.2em;
+	bottom: 0;
+	right: 0;
+    border: 1px solid gray;
+	box-shadow: 0 0 3px gray;
 }
 
 .vicowa-editor .tabtext
@@ -268,58 +273,14 @@
  
 .vicowa-editor .tab-icon .svg-container
 {
-    width: 18px;
-    height: 20px;
+    width: 1.4em;
+    height: 1.4em;
     position: absolute;
 }
  
 .vicowa-editor .visible
 {
     display: block;
-}
- 
-.vicowa-editor .editor-tab-content
-{
-    position: absolute; 
-    top: 0.5em; 
-    left: 3em; 
-    bottom: 0; 
-    right: 0;
-    height: auto;
-    border: 1px solid gray;
-    background-color: #e0eef7;
-}
-
-.vicowa-editor .editor-tab-content .iframe-container
-{
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-.vicowa-editor .editor-tab-content .iframe-container iframe
-{
-    position: absolute;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-.vicowa-editor .editor-tab-content.ace-tm .ace_scroller
-{
-    background-color: transparent;
-}
- 
-.vicowa-editor .editor
-{
-    line-height: 1.5em; 
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border: 1px solid gray;
 }
  
 .vicowa-editor .saved-notify-popup
@@ -339,53 +300,33 @@
     display: block;
 }
  
-.vicowa-editor .edit-button,
-.vicowa-editor .close-button,
-.vicowa-editor .versioncontrol-button
+.vicowa-editor .button
 {
     margin: 0 1px;
-    width: 20px;
-    height: 16px;
+    width: 1.8em;
+    height: 1.8em;
     cursor: default;
     border: 1px solid #DDD;
     display: inline-block;
-    padding: 0.2em;
     position: relative;
-}
- 
-.vicowa-editor .tab-specific-button-bar .edit-button
-{
-    display: block;
-}
- 
-.vicowa-editor .close-button
-{
-    position: absolute;
-    right: 0;
-    top: 0;
+	border-radius: 3px;
+	background-repeat: no-repeat;
+	background-size: 100%;
 }
 
-.vicowa-editor .versioncontrol-button
+.vicowa-editor .button:hover
+{
+	border: 1px solid #BBB;
+	background-color: #eee;
+}
+
+.vicowa-editor .button.close-button,
+.vicowa-editor .button.close-button:hover
 {
 	position: absolute;
-	right: 40px;
-	top: 0;
-}
- 
-.vicowa-editor .edit-button:hover
-{
-    border: 1px solid #BBB;
-    border-radius: 3px;
-    background-color: #EEE;
-}
- 
-.vicowa-editor .edit-button.disabled,
-.vicowa-editor .edit-button.disabled:hover
-{
-    border: 1px solid #DDD;
-    background-color: #DDD;
-    border-radius: 0;
-    color: grey;
+	right:0;
+	border: none;
+	background-color: transparent;
 }
  
 .linkedfilesdialog .editable-article-list
@@ -458,50 +399,13 @@
     color: white;
 }
 
-.vicowa-editor .svg-container .close-circle
-{
-    fill: none; 
-    fill-opacity: 0; 
-    stroke: none;
-}
- 
-.vicowa-editor .svg-container:hover .close-circle
-{
-    fill: #be0000; 
-    fill-opacity: 1; 
-    stroke: none;
-}
- 
-.vicowa-editor .svg-container .close-x-line
-{
-    fill:none; 
-    stroke:#aaaaaa; 
-    stroke-width:2; 
-    stroke-linecap:butt; 
-    stroke-linejoin:miter;
-    stroke-miterlimit:4; 
-    stroke-opacity:1; 
-    stroke-dasharray:none;
-}
-.vicowa-editor .svg-container:hover .close-x-line
-{
-    fill:none; 
-    stroke:#ffffff; 
-    stroke-width:2; 
-    stroke-linecap:butt; 
-    stroke-linejoin:miter;
-    stroke-miterlimit:4; 
-    stroke-opacity:1; 
-    stroke-dasharray:none;
-}
- 
 .vicowa-editor .tab-close .svg-container,
 .vicowa-editor .tab-icon .spin-circle-svg
 {
     width: 20px;
     height: 14px;
 }
- 
+
 @-webkit-keyframes rotate 
 {
   from 

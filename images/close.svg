@@ -1,5 +1,44 @@
-<svg id="button-image-close" class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">
-    <g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">
+	<style>
+		.svg-container .close-circle
+		{
+			fill: none; 
+			fill-opacity: 0; 
+			stroke: none;
+		}
+		
+		.svg-container:hover .close-circle
+		{
+			fill: #be0000; 
+			fill-opacity: 1; 
+			stroke: none;
+		}
+		
+		.svg-container .close-x-line
+		{
+			fill:none; 
+			stroke:#aaaaaa; 
+			stroke-width:2; 
+			stroke-linecap:butt; 
+			stroke-linejoin:miter;
+			stroke-miterlimit:4; 
+			stroke-opacity:1; 
+			stroke-dasharray:none;
+		}
+		.svg-container:hover .close-x-line
+		{
+			fill:none; 
+			stroke:#ffffff; 
+			stroke-width:2; 
+			stroke-linecap:butt; 
+			stroke-linejoin:miter;
+			stroke-miterlimit:4; 
+			stroke-opacity:1; 
+			stroke-dasharray:none;
+		}
+		
+	</style>
+    <g class="svg-container">
         <path class="close-circle" d="M 3,8 A7,7 0 1 1 17,8 7,7 0 1 1 3,8 z"/>
         <path class="close-x-line" d="M 6,12 14,4" />
         <path class="close-x-line" d="m 6,4 8,8" />

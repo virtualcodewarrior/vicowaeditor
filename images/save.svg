@@ -1,24 +1,24 @@
-<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 20 16">
-    <defs>
-        <linearGradient id="linearGradient3617">
-            <stop style="stop-color:#7d7f7f;stop-opacity:1" offset="0" />
-            <stop style="stop-color:#ffffff;stop-opacity:1" offset="0.5" />
-            <stop style="stop-color:#7d7f80;stop-opacity:1" offset="1" />
-        </linearGradient>
-        <linearGradient x1="10" y1="11" x2="13" y2="15" id="linearGradient3627" xlink:href="#linearGradient3617" gradientUnits="userSpaceOnUse" />
-    </defs>
-    <g class="button-icon">
-        <g id="svg-floppy">
-            <path d="M 3,1 17,1 17,15 5,15 3,13 3,1 z" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1" />
-            <rect width="8" height="4" x="6" y="11" style="fill:url(#linearGradient3627);fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <rect width="2" height="2.9999826" x="7" y="11" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.61237067;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <rect width="10" height="6" x="5" y="3" style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
-            <rect width="10" height="2" x="5" y="1" style="fill:#c80000;fill-opacity:1;fill-rule:evenodd;stroke:none" />
-            <path d="M 6,4 14,4" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <path d="M 6,5 14,5" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <path d="M 6,6 14,6" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <path d="M 6,7 14,7" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-            <path d="M 6,8 14,8" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-        </g>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" style="width: 20px; height: 16px;" viewBox="0 0 20 16">
+	<defs>
+		<linearGradient id="linearGradient3617">
+			<stop style="stop-color:#7d7f7f;stop-opacity:1" offset="0" />
+			<stop style="stop-color:#ffffff;stop-opacity:1" offset="0.5" />
+			<stop style="stop-color:#7d7f80;stop-opacity:1" offset="1" />
+		</linearGradient>
+		<linearGradient x1="10" y1="11" x2="13" y2="15" id="linearGradient3627" xlink:href="#linearGradient3617" gradientUnits="userSpaceOnUse" />
+	</defs>
+	<g class="button-icon">
+		<g id="svg-floppy">
+			<path d="M 3,1 17,1 17,15 5,15 3,13 3,1 z" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1" />
+			<rect width="8" height="4" x="6" y="11" style="fill:url(#linearGradient3627);fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<rect width="2" height="2.9999826" x="7" y="11" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.61237067;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<rect width="10" height="6" x="5" y="3" style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+			<rect width="10" height="2" x="5" y="1" style="fill:#c80000;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+			<path d="M 6,4 14,4" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<path d="M 6,5 14,5" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<path d="M 6,6 14,6" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<path d="M 6,7 14,7" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+			<path d="M 6,8 14,8" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+		</g>
+	</g>
 </svg>

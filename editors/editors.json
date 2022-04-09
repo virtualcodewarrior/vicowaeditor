@@ -1,0 +1,12 @@
+{
+	"editors" : 
+	[
+		"javascript.js",
+		"html.js",
+		"php.js",
+		"json.js",
+		"xml.js",
+		"css.js",
+		"txt.js"
+	]
+}

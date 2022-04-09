@@ -3,8 +3,132 @@
 <head>
 <title>ViCoWaEditor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+<link href="normalize.css" rel="stylesheet" type="text/css"></link>
 <script src="editinit.js"></script>
 </head>
 <body class="vicowa vicowaeditor">
+	<div class="vicowa-editor">
+		<div class="target-section">
+			<iframe class="target-iframe">
+			</iframe>
+		</div>
+		<div class="noselect editor-section">
+			<div class="gripper">
+			</div>
+			<div class="container">
+				<div class="tabbar">
+					<div class="tabbarsizing">
+						<input type='button' class="scroll-left" value="&lt;"></input>
+						<div class="scrollcontainer">
+							<ul class="tab-list">
+							</ul>
+						</div>
+						<input type='button' class="scroll-right" value="&gt;"></input>
+					</div>
+					<div class="editorspace">
+					</div>
+				</div>
+				<div class="button-bar">
+					<span class="open-button button edit-button" title="open articles for editing">
+						<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">
+							<defs>
+								<linearGradient id="linearGradient3175">
+									<stop style="stop-color:#ffc000;stop-opacity:1" offset="0" />
+									<stop style="stop-color:#000000;stop-opacity:1" offset="1" />
+								</linearGradient>
+								<linearGradient x1="10.669642" y1="7.2276778" x2="10.669642" y2="14.482142" id="linearGradient3181" xlink:href="#linearGradient3175" gradientUnits="userSpaceOnUse" />
+							</defs>
+							<g class="button-icon">
+								<path d="M 3.0803572,14.482142 L 3.0803572,1.4910705 L 8.2589286,1.4910705 L 8.2589286,3.0089285 L 17.857143,3.0089285 L 17.857143,14.482142 L 3.0803572,14.482142 z" style="fill:url(#linearGradient3181);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />
+								<path d="M 3.0803572,14.482142 L 5.0892858,10.017857 L 19.866072,10.017857 L 17.857143,14.482142" style="fill:#ffc000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+							</g>
+						</svg>
+					</span>
+					<span class="save-button button edit-button disabled" title="Save">
+						<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">
+							<defs>
+								<linearGradient id="linearGradient3617">
+									<stop style="stop-color:#7d7f7f;stop-opacity:1" offset="0" />
+									<stop style="stop-color:#ffffff;stop-opacity:1" offset="0.5" />
+									<stop style="stop-color:#7d7f80;stop-opacity:1" offset="1" />
+								</linearGradient>
+								<linearGradient x1="10" y1="11" x2="13" y2="15" id="linearGradient3627" xlink:href="#linearGradient3617" gradientUnits="userSpaceOnUse" />
+							</defs>
+							<g class="button-icon">
+								<g id="svg-floppy">
+									<path d="M 3,1 17,1 17,15 5,15 3,13 3,1 z" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1" />
+									<rect width="8" height="4" x="6" y="11" style="fill:url(#linearGradient3627);fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<rect width="2" height="2.9999826" x="7" y="11" style="fill:#0000b4;fill-opacity:1;fill-rule:evenodd;stroke:#7f7f7f;stroke-width:0.61237067;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<rect width="10" height="6" x="5" y="3" style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+									<rect width="10" height="2" x="5" y="1" style="fill:#c80000;fill-opacity:1;fill-rule:evenodd;stroke:none" />
+									<path d="M 6,4 14,4" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<path d="M 6,5 14,5" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<path d="M 6,6 14,6" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<path d="M 6,7 14,7" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+									<path d="M 6,8 14,8" style="fill:none;stroke:#7f7f7f;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+								</g>
+							</g>
+						</svg>
+					</span>
+					<!--<span class="saveall-button button edit-button disabled" title="Save all"></span>-->
+					<span class="versioncontrol-button button" title="Version control">
+						<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">
+						</svg>
+					</span>
+					<span class="close-button disabled button" title="Close the editor">
+						<svg class="svg-container" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 20 16">
+							<style>
+								.svg-container .close-circle
+								{
+									fill: none; 
+									fill-opacity: 0; 
+									stroke: none;
+								}
+								
+								.svg-container:hover .close-circle
+								{
+									fill: #be0000; 
+									fill-opacity: 1; 
+									stroke: none;
+								}
+								
+								.svg-container .close-x-line
+								{
+									fill:none; 
+									stroke:#aaaaaa; 
+									stroke-width:2; 
+									stroke-linecap:butt; 
+									stroke-linejoin:miter;
+									stroke-miterlimit:4; 
+									stroke-opacity:1; 
+									stroke-dasharray:none;
+								}
+								.svg-container:hover .close-x-line
+								{
+									fill:none; 
+									stroke:#ffffff; 
+									stroke-width:2; 
+									stroke-linecap:butt; 
+									stroke-linejoin:miter;
+									stroke-miterlimit:4; 
+									stroke-opacity:1; 
+									stroke-dasharray:none;
+								}
+								
+							</style>
+							<g class="svg-container">
+								<path class="close-circle" d="M 3,8 A7,7 0 1 1 17,8 7,7 0 1 1 3,8 z"/>
+								<path class="close-x-line" d="M 6,12 14,4" />
+								<path class="close-x-line" d="m 6,4 8,8" />
+							</g>
+						</svg>
+					</span>
+				</div>
+				</span>
+			</div>
+		</div>
+		<div class="saved-notify-popup">
+		</div>
+	</div>
 </body>
-</html>
+</html> 
